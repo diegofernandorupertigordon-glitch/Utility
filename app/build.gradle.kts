@@ -39,11 +39,13 @@ dependencies {
 
     // 🧱 Core Compose
     implementation("androidx.activity:activity-compose:1.9.1")
-    implementation("androidx.compose.ui:ui:1.6.8")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.6.8")
-    implementation("androidx.compose.material3:material3:1.2.1")
-    implementation("androidx.compose.animation:animation:1.6.8")
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.compose.ui:ui:1.9.0")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.9.0")
+    implementation("androidx.compose.material3:material3:1.3.1")
+    implementation("androidx.compose.animation:animation:1.9.0")
+
+    // ✅ Icons Extended estable
+    implementation("androidx.compose.material:material-icons-extended:1.6.8")
 
     // 🧭 Navegación
     implementation("androidx.navigation:navigation-compose:2.7.7")
@@ -57,20 +59,22 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
 
     // 🧪 Testing / Debug
-    debugImplementation("androidx.compose.ui:ui-tooling:1.6.8")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.9.0")
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 
-    // 🔥🔥🔥 FIREBASE (ORDEN CORRECTO) 🔥🔥🔥
-
-    // 🔥 Firebase BOM (SIEMPRE PRIMERO)
+    // 🔥🔥🔥 FIREBASE
     implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
-
-    // 🔐 Firebase Auth
     implementation("com.google.firebase:firebase-auth-ktx")
-
-    // 🌐 Google Sign-In
     implementation("com.google.android.gms:play-services-auth:21.0.0")
+
+    dependencies {
+        implementation("io.coil-kt:coil-compose:2.5.0")
+        implementation("io.coil-kt:coil-compose:2.6.0")
+
+    }
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-auth-ktx")
 
 }

@@ -1,4 +1,3 @@
-// 📦 Paquete donde vive esta pantalla
 package app.application.utility.ui.screens.main
 
 import androidx.compose.animation.AnimatedVisibility
@@ -15,124 +14,105 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.SwapVert
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import app.application.saludo.ui.theme.SaludoTheme
+import app.application.utility.ui.components.BaseScreen
 import app.application.utility.ui.navigation.Routes
 import app.application.utility.ui.screens.auth.AuthViewModel
 
-// ============================
-// 🔥 PANTALLA PRINCIPAL
-// ============================
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(navController: NavController) {
-
-    // 🔥 Auth ViewModel
     val authViewModel: AuthViewModel = viewModel()
+    val context = LocalContext.current
 
-    // 🌌 Fondo futurista degradado
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        Color(0xFF0A0F1F),
-                        Color(0xFF101A2F),
-                        Color(0xFF0A0F1F)
-                    )
-                )
-            )
-    ) {
-
-        Scaffold(
-            containerColor = Color.Transparent,
-            topBar = {
-                CenterAlignedTopAppBar(
-                    title = {
-                        Text(
-                            text = "App de Utilidades",
-                            color = Color(0xFF64FFDA),
-                            style = MaterialTheme.typography.headlineMedium
-                        )
-                    },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = Color(0xFF0F172A)
-                    )
-                )
-            }
-        ) { padding ->
-
-            AnimatedVisibility(
-                visible = true,
-                enter = fadeIn() + slideInVertically()
+    // 🎨 Cambiado a isDark = false para el fondo Blanco Humo Premium
+    BaseScreen(title = "Herramientas", isDark = false) {
+        AnimatedVisibility(
+            visible = true,
+            enter = fadeIn() + slideInVertically()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // Cabecera del Menú
+                Column(modifier = Modifier.padding(bottom = 8.dp)) {
+                    Text(
+                        text = "UTILITY BOX",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF00E5FF)
+                    )
+                    Text(
+                        text = "Menú Principal",
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFF2D3436)
+                    )
+                }
 
-                Column(
-                    modifier = Modifier
-                        .padding(padding)
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(18.dp)
+                // Opciones del Menú
+                MenuCard("Calculadora", Icons.Filled.Calculate) {
+                    navController.navigate(Routes.Calculadora.route)
+                }
+
+                MenuCard("Verificar Edad", Icons.Filled.Person) {
+                    navController.navigate(Routes.Edad.route)
+                }
+
+                MenuCard("Número Primo", Icons.Filled.Star) {
+                    navController.navigate(Routes.Primo.route)
+                }
+
+                MenuCard("Mayor o Menor", Icons.Filled.SwapVert) {
+                    navController.navigate(Routes.MayorMenor.route)
+                }
+
+                MenuCard("Saludo", Icons.Filled.Face) {
+                    navController.navigate(Routes.Saludo.route)
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                // 🚪 Logout que devuelve al Selector (Arquitectura Centralizada)
+                MenuCard(
+                    text = "Volver al Inicio",
+                    icon = Icons.Filled.ArrowBack,
+                    isLogout = false,
+                    colorAccent = Color(0xFF2D3436)
                 ) {
-
-                    MenuCard("Calculadora", Icons.Filled.Calculate) {
-                        navController.navigate(Routes.Calculadora.route)
-                    }
-
-                    MenuCard("Verificar Edad", Icons.Filled.Person) {
-                        navController.navigate(Routes.Edad.route)
-                    }
-
-                    MenuCard("Número Primo", Icons.Filled.Star) {
-                        navController.navigate(Routes.Primo.route)
-                    }
-
-                    MenuCard("Mayor o Menor", Icons.Filled.SwapVert) {
-                        navController.navigate(Routes.MayorMenor.route)
-                    }
-
-                    MenuCard("Saludo", Icons.Filled.Face) {
-                        navController.navigate(Routes.Saludo.route)
-                    }
-
-                    // 🚪 LOGOUT (SEGURO)
-                    MenuCard("Cerrar Sesión", Icons.Filled.Logout) {
-                        authViewModel.logout {
-                            navController.navigate(Routes.Login.route) {
-                                popUpTo(Routes.Main.route) { inclusive = true }
-                            }
-                        }
+                    navController.navigate(Routes.Selector.route) {
+                        popUpTo(Routes.Main.route) { inclusive = true }
                     }
                 }
             }
@@ -140,68 +120,74 @@ fun MainScreen(navController: NavController) {
     }
 }
 
-// ============================
-// 💎 CARD FUTURISTA PREMIUM
-// ============================
 @Composable
 fun MenuCard(
     text: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
+    isLogout: Boolean = false,
+    colorAccent: Color = Color(0xFF00E5FF),
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.96f else 1f,
-        animationSpec = tween(120),
-        label = ""
+        targetValue = if (isPressed) 0.97f else 1f,
+        animationSpec = tween(150),
+        label = "scale"
     )
 
-    val glowBrush = Brush.horizontalGradient(
-        listOf(Color(0xFF64FFDA), Color(0xFF38BDF8))
-    )
-
+    // Estética coherente: Fondo blanco, borde suave y acentos en Cyan
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .scale(scale)
-            .border(1.5.dp, glowBrush, RoundedCornerShape(22.dp))
-            .background(Color(0xFF111827), RoundedCornerShape(22.dp))
+            .background(Color.White, RoundedCornerShape(22.dp))
+            .border(
+                width = 1.dp,
+                color = Color.LightGray.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(22.dp)
+            )
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
                 onClick = onClick
             )
-            .padding(18.dp)
+            .padding(20.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = text,
-                tint = Color(0xFF64FFDA),
-                modifier = Modifier.size(34.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .background(colorAccent.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = text,
+                    tint = colorAccent,
+                    modifier = Modifier.size(26.dp)
+                )
+            }
 
             Text(
                 text = text,
-                color = Color.White,
+                color = Color(0xFF2D3436),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.titleLarge
             )
-        }
-    }
-}
 
-// ============================
-// 👁️ Preview
-// ============================
-@Preview(showBackground = true)
-@Composable
-fun MainPreview() {
-    SaludoTheme {
-        MainScreen(rememberNavController())
+            Spacer(modifier = Modifier.weight(1f))
+
+            Icon(
+                imageVector = Icons.Filled.ChevronRight,
+                contentDescription = null,
+                tint = Color.LightGray,
+                modifier = Modifier.size(20.dp)
+            )
+        }
     }
 }

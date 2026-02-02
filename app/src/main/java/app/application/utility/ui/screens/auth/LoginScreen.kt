@@ -3,23 +3,36 @@ package app.application.utility.ui.screens.auth
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import app.application.utility.R
 import app.application.utility.ui.components.BaseScreen
 import app.application.utility.ui.components.CardContainer
 import app.application.utility.ui.components.FuturisticButton
@@ -29,163 +42,151 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 
-
-/**
- * 🔐 LoginScreen
- * - Login con Email/Password (Firebase)
- * - Glow rojo dinámico
- * - Navegación segura
- * - Google SOLO UI (sin dependencias aún)
- */
 @Composable
 fun LoginScreen(navController: NavController) {
-
-    // 📌 Estados del formulario
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-
-    // 🔴 Estados visuales (glow rojo)
-    var emailError by remember { mutableStateOf(false) }
-    var passwordError by remember { mutableStateOf(false) }
-
-    // 🔥 ViewModel Firebase
     val authViewModel: AuthViewModel = viewModel()
     val firebaseError by authViewModel.error.collectAsState()
+    val context = LocalContext.current
 
-    // 🌐 Configuración Google Sign-In
-    val context = navController.context
-
-    val googleSignInClient = remember {
-        GoogleSignIn.getClient(
-            context,
-            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(
-                    context.getString(
-                        context.resources.getIdentifier(
-                            "default_web_client_id",
-                            "string",
-                            context.packageName
-                        )
-                    )
-                )
-                .requestEmail()
-                .build()
-        )
-    }
-    // 🚀 Launcher Google
+    // Launcher para el resultado de Google Sign-In
     val googleLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
-
         if (result.resultCode == Activity.RESULT_OK) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-
             try {
                 val account = task.getResult(ApiException::class.java)
-                val idToken = account.idToken
-
-                if (idToken != null) {
-                    authViewModel.signInWithGoogle(idToken) {
-                        navController.navigate(Routes.Main.route) {
+                account?.idToken?.let { token ->
+                    authViewModel.signInWithGoogle(token) {
+                        // Navegación exitosa al Selector para refrescar el estado global
+                        navController.navigate(Routes.Selector.route) {
                             popUpTo(Routes.Login.route) { inclusive = true }
                         }
                     }
                 }
-
             } catch (e: ApiException) {
-                // Error controlado
+                // Manejo de errores silencioso o podrías loguearlo
             }
         }
     }
 
-    BaseScreen(title = "Iniciar Sesión") {
-
-        AnimatedVisibility(
-            visible = true,
-            enter = fadeIn() + slideInVertically()
+    BaseScreen(title = "", isDark = false) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.height(40.dp))
 
+            // Cabecera Premium
+            Text("BIENVENIDO", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF00E5FF))
+            Text("Iniciar Sesión", fontSize = 32.sp, fontWeight = FontWeight.Black, color = Color(0xFF2D3436))
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            // Contenedor de Formulario
             CardContainer {
-
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-
-                    // 📧 Email
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     FuturisticTextField(
                         value = email,
-                        onValueChange = {
-                            email = it
-                            emailError = false
-                        },
+                        onValueChange = { email = it },
                         label = "Email",
-                        keyboardType = KeyboardType.Email,
-                        isError = emailError
+                        keyboardType = KeyboardType.Email
                     )
 
-                    // 🔒 Password
                     FuturisticTextField(
                         value = password,
-                        onValueChange = {
-                            password = it
-                            passwordError = false
-                        },
+                        onValueChange = { password = it },
                         label = "Contraseña",
-                        keyboardType = KeyboardType.Password,
-                        isError = passwordError
+                        keyboardType = KeyboardType.Password
                     )
 
-                    // ⚠️ Error Firebase
+                    // Mostrar error de Firebase si existe
                     if (firebaseError.isNotEmpty()) {
-                        androidx.compose.material3.Text(
+                        Text(
                             text = firebaseError,
-                            color = androidx.compose.material3.MaterialTheme.colorScheme.error
+                            color = Color.Red,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(horizontal = 4.dp)
                         )
                     }
 
-                    Spacer(modifier = androidx.compose.ui.Modifier.height(8.dp))
-
-                    // 🔐 Sign In (Firebase real)
+                    // Botón de Login Tradicional
                     FuturisticButton(
-                        text = "Sign In",
+                        text = "ENTRAR",
                         onClick = {
-
-                            // 🧠 Validación visual
-                            emailError = email.isBlank() || !email.contains("@")
-                            passwordError = password.length < 6
-
-                            // 🚀 Login Firebase
-                            if (!emailError && !passwordError) {
-                                authViewModel.login(
-                                    email = email,
-                                    password = password
-                                ) {
-                                    navController.navigate(Routes.Main.route) {
-                                        popUpTo(Routes.Login.route) { inclusive = true }
-                                    }
+                            authViewModel.login(email, password) {
+                                navController.navigate(Routes.Selector.route) {
+                                    popUpTo(Routes.Login.route) { inclusive = true }
                                 }
                             }
-                        }
+                        },
+                        modifier = Modifier.fillMaxWidth()
                     )
 
-                    // 🌐 Google (Firebase real)
-                    FuturisticButton(
-                        text = "Continuar con Google",
-                        onClick = {
-                            googleSignInClient.signOut() // evita cuentas cacheadas
-                            googleLauncher.launch(googleSignInClient.signInIntent)
-                        }
-                    )
+                    // Separador visual
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    ) {
+                        HorizontalDivider(
+                            modifier = Modifier.weight(1f),
+                            color = Color.LightGray.copy(alpha = 0.5f)
+                        )
+                        Text(
+                            " o ",
+                            color = Color.Gray,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+                        HorizontalDivider(
+                            modifier = Modifier.weight(1f),
+                            color = Color.LightGray.copy(alpha = 0.5f)
+                        )
+                    }
 
-
-                    // 📝 Registro
+                    // Botón de Google Sign-In
                     FuturisticButton(
-                        text = "Crear cuenta",
+                        text = "CONTINUAR CON GOOGLE",
                         onClick = {
-                            navController.navigate(Routes.Register.route)
-                        }
+                            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                .requestIdToken(context.getString(R.string.default_web_client_id))
+                                .requestEmail()
+                                .build()
+                            val client = GoogleSignIn.getClient(context, gso)
+
+                            // Limpiamos sesión previa de Google para obligar a elegir cuenta
+                            client.signOut().addOnCompleteListener {
+                                googleLauncher.launch(client.signInIntent)
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Enlace a Registro
+            TextButton(onClick = { navController.navigate(Routes.Register.route) }) {
+                Text(
+                    "¿No tienes cuenta? Regístrate aquí",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            // Botón opcional para volver al selector sin loguearse
+            TextButton(onClick = {
+                navController.navigate(Routes.Selector.route) {
+                    popUpTo(Routes.Login.route) { inclusive = true }
+                }
+            }) {
+                Text("VOLVER AL INICIO", color = Color(0xFF00E5FF), fontSize = 11.sp)
             }
         }
     }

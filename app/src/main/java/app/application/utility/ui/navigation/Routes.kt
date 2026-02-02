@@ -1,31 +1,31 @@
 package app.application.utility.ui.navigation
 
-/**
- * 🧭 Rutas de navegación de la app
- */
 sealed class Routes(val route: String) {
-
-    // 🌌 Splash
+    // 🌌 Sistema
     object Splash : Routes("splash")
+    object Selector : Routes("selector")
 
+    // 🔐 Autenticación
     object Login : Routes("login")
     object Register : Routes("register")
 
-    // 🏠 Menú principal
+    // 🏠 Herramientas (Utility)
     object Main : Routes("main")
-
-    // 📟 Calculadora
     object Calculadora : Routes("calculadora")
-
-    // 👤 Verificador de edad
     object Edad : Routes("edad")
-
-    // ⭐ Número primo
     object Primo : Routes("primo")
-
-    // 🔼 Mayor y menor
     object MayorMenor : Routes("mayor_menor")
-
-    // 👋 Saludo (NUEVO)
     object Saludo : Routes("saludo")
+
+    // 🧴 Tienda
+    object TiendaHome : Routes("tienda_home")
+    object Cart : Routes("cart")
+    object ProductDetail : Routes("product_detail/{productId}") {
+        fun createRoute(productId: String): String = "product_detail/$productId"
+    }
+
+    // 📊 Administración
+    object AdminProducts : Routes("admin_products") // Panel Central
+    object AdminInventory : Routes("admin_inventory") // Inventario + Registro
+    object SalesHistory : Routes("sales_history") // Historial
 }

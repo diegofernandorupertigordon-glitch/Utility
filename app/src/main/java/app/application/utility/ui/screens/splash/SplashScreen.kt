@@ -1,18 +1,14 @@
-// 📦 Paquete donde vive esta pantalla
 package app.application.utility.ui.screens.splash
 
-// 🎬 Animaciones
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
-
-// 📐 Layout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-
-// 🎨 UI
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,71 +21,45 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-// 🧭 Navegación
 import androidx.navigation.NavController
 import app.application.utility.ui.navigation.Routes
-
-// 🔐 Firebase Auth
-import com.google.firebase.auth.FirebaseAuth
-
-// 🕒 Delay
 import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(navController: NavController) {
 
-    // 🔵 Opacidad (fade in)
+    // Animaciones para un efecto de entrada suave
     val alpha = remember { Animatable(0f) }
-
-    // 🔍 Escala suave (zoom)
-    val scale = remember { Animatable(0.9f) }
-
-    // 🔐 Firebase Auth
-    val auth = FirebaseAuth.getInstance()
+    val scale = remember { Animatable(0.8f) }
 
     LaunchedEffect(Unit) {
+        // Pequeño delay para estabilizar la vista
+        delay(300)
 
-        // 🎬 Animación combinada (fade + zoom)
+        // Ejecución de animaciones
         alpha.animateTo(1f, tween(1200))
         scale.animateTo(1f, tween(1200))
 
-        // ⏱️ Tiempo visible del splash
-        delay(2500)
+        // Tiempo de exposición de tu marca personal
+        delay(1800)
 
-        // 🧠 Usuario actual
-        val user = auth.currentUser
-
-        // 🚦 Navegación inteligente
-        if (user != null) {
-            // ✅ Usuario logueado → Main
-            navController.navigate(Routes.Main.route) {
-                popUpTo(Routes.Splash.route) { inclusive = true }
-            }
-        } else {
-            // 🚪 Usuario NO logueado → Login
-            navController.navigate(Routes.Login.route) {
-                popUpTo(Routes.Splash.route) { inclusive = true }
-            }
+        // Navegación fluida hacia el Selector Inteligente
+        navController.navigate(Routes.Selector.route) {
+            popUpTo(Routes.Splash.route) { inclusive = true }
         }
     }
 
-    // 🌌 Fondo futurista
+    // Contenedor principal con fondo Blanco Humo Premium
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    listOf(
-                        Color(0xFF0A0F1F),
-                        Color(0xFF101A2F),
-                        Color(0xFF0A0F1F)
-                    )
+                    listOf(Color(0xFFF8FAFC), Color(0xFFFFFFFF))
                 )
             ),
         contentAlignment = Alignment.Center
     ) {
-
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -100,20 +70,33 @@ fun SplashScreen(navController: NavController) {
                     scaleY = scale.value
                 )
         ) {
-
-            // 🚀 Nombre de la App
+            // Iniciales de marca personal
             Text(
-                text = "Utility App",
-                fontSize = 36.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF64FFDA)
+                text = "DR",
+                fontSize = 80.sp, // Tamaño impactante
+                fontWeight = FontWeight.Black,
+                color = Color(0xFF2D3436),
+                letterSpacing = 10.sp
             )
 
-            // ✨ Subtítulo futurista
+            // Subtítulo con el acento Cyan Neón
             Text(
-                text = "Tecnología que simplifica tu mundo",
+                text = "PREMIUM UTILITIES",
                 fontSize = 14.sp,
-                color = Color(0xFF9AEFFF)
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF00E5FF),
+                letterSpacing = 4.sp
+            )
+
+            Spacer(modifier = Modifier.height(48.dp))
+
+            // Indicador de carga sutil o slogan final
+            Text(
+                text = "CARGANDO ECOSISTEMA",
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Gray.copy(alpha = 0.4f),
+                letterSpacing = 2.sp
             )
         }
     }

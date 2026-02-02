@@ -1,20 +1,30 @@
 package app.application.utility.ui.screens.auth
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import app.application.utility.ui.components.BaseScreen
@@ -25,126 +35,64 @@ import app.application.utility.ui.navigation.Routes
 
 @Composable
 fun RegisterScreen(navController: NavController) {
-
-    // 📌 Estados del formulario
-    var nombre by remember { mutableStateOf("") }
-    var edad by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-
-    // 🔴 Estados visuales (glow rojo)
-    var nombreError by remember { mutableStateOf(false) }
-    var edadError by remember { mutableStateOf(false) }
-    var emailError by remember { mutableStateOf(false) }
-    var passwordError by remember { mutableStateOf(false) }
-
-    // 🔥 ViewModel Firebase (YA EXISTE)
     val authViewModel: AuthViewModel = viewModel()
     val firebaseError by authViewModel.error.collectAsState()
 
-    BaseScreen(title = "Registro") {
-
-        AnimatedVisibility(
-            visible = true,
-            enter = fadeIn() + slideInVertically()
+    BaseScreen(title = "Registro", isDark = false) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.height(40.dp))
+
+            Text("NUEVA CUENTA", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF00E5FF))
+            Text("Únete a Nosotros", fontSize = 32.sp, fontWeight = FontWeight.Black, color = Color(0xFF2D3436))
+            Text("Crea tu cuenta para acceder a todos los servicios", fontSize = 14.sp, color = Color.Gray)
+
+            Spacer(modifier = Modifier.height(32.dp))
 
             CardContainer {
-
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-
-                    // 👤 Nombre
-                    FuturisticTextField(
-                        value = nombre,
-                        onValueChange = {
-                            nombre = it
-                            nombreError = false
-                        },
-                        label = "Nombre",
-                        keyboardType = KeyboardType.Text,
-                        isError = nombreError
-                    )
-
-                    // 🔢 Edad
-                    FuturisticTextField(
-                        value = edad,
-                        onValueChange = {
-                            if (it.all { c -> c.isDigit() }) {
-                                edad = it
-                                edadError = false
-                            }
-                        },
-                        label = "Edad",
-                        keyboardType = KeyboardType.Number,
-                        isError = edadError
-                    )
-
-                    // 📧 Email
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     FuturisticTextField(
                         value = email,
-                        onValueChange = {
-                            email = it
-                            emailError = false
-                        },
-                        label = "Email",
-                        keyboardType = KeyboardType.Email,
-                        isError = emailError
+                        onValueChange = { email = it },
+                        label = "Correo Electrónico",
+                        keyboardType = KeyboardType.Email
                     )
 
-                    // 🔒 Password
                     FuturisticTextField(
                         value = password,
-                        onValueChange = {
-                            password = it
-                            passwordError = false
-                        },
-                        label = "Contraseña",
-                        keyboardType = KeyboardType.Password,
-                        isError = passwordError
+                        onValueChange = { password = it },
+                        label = "Contraseña (6+ caracteres)",
+                        keyboardType = KeyboardType.Password
                     )
 
-                    // ⚠️ Error Firebase
                     if (firebaseError.isNotEmpty()) {
-                        androidx.compose.material3.Text(
-                            text = firebaseError,
-                            color = androidx.compose.material3.MaterialTheme.colorScheme.error
-                        )
+                        Text(text = firebaseError, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
                     }
 
-                    Spacer(modifier = androidx.compose.ui.Modifier.height(8.dp))
-
-                    // 🚀 Crear cuenta (Firebase REAL)
                     FuturisticButton(
-                        text = "Crear Cuenta",
+                        text = "CREAR CUENTA",
                         onClick = {
-
-                            // 🧠 Validaciones visuales
-                            nombreError = nombre.isBlank()
-                            edadError = edad.isBlank()
-                            emailError = email.isBlank() || !email.contains("@")
-                            passwordError = password.length < 6
-
-                            if (
-                                !nombreError &&
-                                !edadError &&
-                                !emailError &&
-                                !passwordError
-                            ) {
-                                authViewModel.register(
-                                    email = email,
-                                    password = password
-                                ) {
-                                    // ✅ Registro exitoso → Main
-                                    navController.navigate(Routes.Main.route) {
-                                        popUpTo(Routes.Register.route) { inclusive = true }
-                                    }
+                            authViewModel.register(email, password) {
+                                // 🔄 REDIRECCIÓN AL SELECTOR (Opción A)
+                                navController.navigate(Routes.Selector.route) {
+                                    popUpTo(Routes.Register.route) { inclusive = true }
                                 }
                             }
-                        }
+                        },
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
+            }
+
+            TextButton(onClick = { navController.popBackStack() }) {
+                Text("¿Ya tienes cuenta? Inicia sesión", color = Color(0xFF00E5FF), fontWeight = FontWeight.Bold)
             }
         }
     }
