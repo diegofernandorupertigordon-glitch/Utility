@@ -46,6 +46,7 @@ fun ProductCard(
     val DarkText = Color(0xFF2D3436)
     val outOfStock = product.stock <= 0
 
+    // Detectar si la imagen está en drawables locales
     val imageResId = remember(product.imageUrl) {
         val id = context.resources.getIdentifier(product.imageUrl, "drawable", context.packageName)
         if (id != 0) id else null
@@ -62,9 +63,9 @@ fun ProductCard(
             )
             .background(Color.White, RoundedCornerShape(22.dp))
             .border(1.dp, if (outOfStock) Color.LightGray.copy(0.3f) else SoftGray, RoundedCornerShape(22.dp))
-            .clickable(enabled = !outOfStock) { onClick() } // Deshabilitar si no hay stock
+            .clickable(enabled = !outOfStock) { onClick() }
             .padding(12.dp)
-            .alpha(if (outOfStock) 0.6f else 1f) // Efecto visual de deshabilitado
+            .alpha(if (outOfStock) 0.6f else 1f)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             // Imagen del producto
@@ -74,19 +75,25 @@ fun ProductCard(
                     .clip(RoundedCornerShape(18.dp))
                     .background(SoftGray)
             ) {
-                if (imageResId == null) {
-                    AsyncImage(
-                        model = product.imageUrl.ifEmpty { "https://via.placeholder.com/150" },
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
+                if (imageResId != null) {
+                    // Carga desde Drawable local
                     Image(
                         painter = painterResource(id = imageResId),
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
+                    )
+                } else {
+                    // Carga desde URL con Placeholder de carga y Error
+                    AsyncImage(
+                        model = product.imageUrl.ifEmpty { "https://via.placeholder.com/150" },
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                        // Icono de galería mientras carga
+                        placeholder = painterResource(id = android.R.drawable.ic_menu_gallery),
+                        // Icono de alerta si falla la descarga
+                        error = painterResource(id = android.R.drawable.ic_menu_report_image)
                     )
                 }
             }

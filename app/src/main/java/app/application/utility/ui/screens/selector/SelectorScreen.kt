@@ -61,7 +61,7 @@ fun SelectorScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Tarjeta Utility (Acceso Libre o con Login según prefieras)
+            // Tarjeta Utility
             LocalGlowImageCard(
                 title = "HERRAMIENTAS UTILITY",
                 subtitle = "Gestión y Cálculo",
@@ -72,10 +72,10 @@ fun SelectorScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Tarjeta Tienda (Requiere Login)
+            // Tarjeta Tienda (Actualizada con tu marca)
             LocalGlowImageCard(
-                title = "TIENDA DE PERFUMES",
-                subtitle = "Aromas UIO",
+                title = "PERFUMERÍA INTEGRAL",
+                subtitle = "Catálogo Exclusivo",
                 imageUrl = "https://images.unsplash.com/photo-1541643600914-78b084683601",
                 neonColor = Color(0xFFFFAB00),
                 onClick = {

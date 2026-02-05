@@ -4,7 +4,6 @@ import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.PropertyName
 
 data class Product(
-    // 🚫 Excluimos el ID de los campos internos del documento de Firebase
     @get:Exclude @set:Exclude
     var id: String = "",
 
@@ -22,9 +21,11 @@ data class Product(
     var presentacionMl: Int = 0,
     var stock: Int = 0,
     var vendidos: Int = 0,
-    var imageUrl: String = ""
+    var imageUrl: String = "",
+
+    // ✨ Nuevo campo para departamentos
+    var categoria: String = "🧴 Perfumería"
 ) {
-    // 🛠️ Mantiene compatibilidad con precios enteros o decimales en Firebase
     @PropertyName("price")
     fun setPrecio(value: Any?) {
         this.precio = when (value) {

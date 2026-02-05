@@ -56,7 +56,7 @@ fun SalesHistoryScreen(navController: NavController) {
             .take(3)
     }
 
-    BaseScreen(title = "Historial Aromas UIO") {
+    BaseScreen(title = "Reporte de Movimientos") { // NOMBRE ACTUALIZADO
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
 
             IconButton(onClick = { navController.popBackStack() }) {
@@ -82,9 +82,9 @@ fun SalesHistoryScreen(navController: NavController) {
                 }
             }
 
-            // --- SECCIÓN LOS FAVORITOS ---
+            // --- SECCIÓN FAVORITOS ---
             if (topSelling.isNotEmpty() && topSelling.any { it.second > 0 }) {
-                Text("LOS FAVORITOS", fontSize = 14.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(vertical = 8.dp))
+                Text("ARTÍCULOS MÁS VENDIDOS", fontSize = 14.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(vertical = 8.dp))
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F2F6)),
@@ -101,16 +101,15 @@ fun SalesHistoryScreen(navController: NavController) {
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(item.first, fontSize = 13.sp, fontWeight = FontWeight.Medium)
                                 }
-                                Text("${item.second} unidades", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                                Text("${item.second} uds", fontSize = 13.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
                 }
             }
 
-            Text("ÚLTIMOS MOVIMIENTOS", fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 12.dp))
+            Text("ÚLTIMAS VENTAS", fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 12.dp))
 
-            // --- LISTA DE VENTAS ---
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxSize()) {
                 items(sales) { sale ->
                     Card(
@@ -124,9 +123,7 @@ fun SalesHistoryScreen(navController: NavController) {
                                 Text("+$${String.format("%.2f", sale.total)}", fontWeight = FontWeight.Black, color = Color(0xFF00C853))
                             }
                             Text("Cliente: ${sale.cliente}", fontSize = 14.sp, fontWeight = FontWeight.Medium)
-
                             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), thickness = 0.5.dp)
-
                             sale.items.forEach { item ->
                                 Text("• ${item["nombre"]} (x${item["cantidad"]})", fontSize = 12.sp, color = Color.DarkGray)
                             }
