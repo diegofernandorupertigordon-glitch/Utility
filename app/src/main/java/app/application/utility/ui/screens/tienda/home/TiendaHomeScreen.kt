@@ -84,12 +84,12 @@ fun TiendaHomeScreen(navController: NavController) {
     val context = LocalContext.current
 
     val categorias = listOf("🧴 Perfumería", "💄 Maquillaje", "🛁 Accesorios")
-
     val pagerState = rememberPagerState(pageCount = { categorias.size })
     val scope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
 
     val isLoading = products.isEmpty()
+    val NeonCyan = Color(0xFF00E5FF)
 
     BaseScreen(title = "", isDark = false) {
         Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
@@ -102,6 +102,7 @@ fun TiendaHomeScreen(navController: NavController) {
                         .fillMaxSize()
                 ) {
 
+                    // --- HEADER PREMIUM ---
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -110,38 +111,43 @@ fun TiendaHomeScreen(navController: NavController) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column {
-                            Text("DEPARTAMENTOS", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF00E5FF))
+                            Text("DEPARTAMENTOS", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = NeonCyan, letterSpacing = 1.sp)
                             Text("Perfumería Integral", fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color(0xFF2D3436))
                         }
                         IconButton(
                             onClick = { navController.navigate(Routes.Cart.route) },
                             modifier = Modifier
                                 .size(48.dp)
+                                .shadow(8.dp, RoundedCornerShape(14.dp), spotColor = Color(0xFFFFAB00).copy(alpha = 0.5f))
                                 .background(Color(0xFFFFF9E6), RoundedCornerShape(14.dp))
                         ) {
                             Icon(Icons.Default.ShoppingCart, null, tint = Color(0xFFFFAB00), modifier = Modifier.size(24.dp))
                         }
                     }
 
+                    // --- BUSCADOR CORREGIDO ---
                     OutlinedTextField(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 24.dp),
-                        placeholder = { Text("¿Qué buscas hoy?", color = Color.Gray) },
-                        leadingIcon = { Icon(Icons.Default.Search, null, tint = Color(0xFF00E5FF)) },
-                        shape = RoundedCornerShape(20.dp),
+                            .padding(horizontal = 24.dp)
+                            .shadow(4.dp, RoundedCornerShape(22.dp)),
+                        placeholder = { Text("¿Qué buscas hoy?", color = Color.Gray.copy(alpha = 0.6f)) },
+                        leadingIcon = { Icon(Icons.Default.Search, null, tint = NeonCyan) },
+                        shape = RoundedCornerShape(22.dp),
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFF00E5FF),
+                            focusedBorderColor = NeonCyan,
+                            unfocusedBorderColor = Color.Transparent,
                             focusedContainerColor = Color.White,
                             unfocusedContainerColor = Color.White
                         )
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
+                    // --- CATEGORÍAS TIPO TAB ROW ---
                     ScrollableTabRow(
                         selectedTabIndex = pagerState.currentPage,
                         edgePadding = 24.dp,
@@ -149,10 +155,10 @@ fun TiendaHomeScreen(navController: NavController) {
                         divider = {},
                         indicator = { tabPositions ->
                             if (pagerState.currentPage < tabPositions.size) {
-                                TabRowDefaults.Indicator(
+                                TabRowDefaults.SecondaryIndicator(
                                     modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
                                     height = 3.dp,
-                                    color = Color(0xFF00E5FF)
+                                    color = NeonCyan
                                 )
                             }
                         }
@@ -163,17 +169,18 @@ fun TiendaHomeScreen(navController: NavController) {
                                 onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
                                 text = {
                                     Text(
-                                        text = cat,
-                                        color = if (pagerState.currentPage == index) Color(0xFF00E5FF) else Color.Gray,
+                                        text = cat.uppercase(),
+                                        color = if (pagerState.currentPage == index) Color(0xFF2D3436) else Color.Gray,
                                         fontWeight = if (pagerState.currentPage == index) FontWeight.Black else FontWeight.Medium,
-                                        fontSize = 14.sp
+                                        fontSize = 12.sp,
+                                        letterSpacing = 0.5.sp
                                     )
                                 }
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     HorizontalPager(
                         state = pagerState,
@@ -208,11 +215,12 @@ fun TiendaHomeScreen(navController: NavController) {
                         } else {
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(14.dp),
                                 contentPadding = PaddingValues(
-                                    bottom = 110.dp,
+                                    bottom = 120.dp,
                                     start = 20.dp,
-                                    end = 20.dp
+                                    end = 20.dp,
+                                    top = 10.dp
                                 )
                             ) {
                                 items(filteredList) { product ->
@@ -231,7 +239,7 @@ fun TiendaHomeScreen(navController: NavController) {
                 }
             }
 
-            // BARRA FLOTANTE
+            // --- BARRA FLOTANTE DE ADMIN ---
             if (isAdmin) {
                 AnimatedVisibility(
                     visible = true,
@@ -244,13 +252,13 @@ fun TiendaHomeScreen(navController: NavController) {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         color = Color.White.copy(alpha = 0.98f),
-                        shape = RoundedCornerShape(24.dp),
-                        shadowElevation = 10.dp,
+                        shape = RoundedCornerShape(28.dp),
+                        shadowElevation = 15.dp,
                         border = androidx.compose.foundation.BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.2f))
                     ) {
                         Row(
                             modifier = Modifier
-                                .padding(horizontal = 12.dp, vertical = 10.dp)
+                                .padding(horizontal = 14.dp, vertical = 10.dp)
                                 .fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceAround,
                             verticalAlignment = Alignment.CenterVertically
@@ -258,7 +266,7 @@ fun TiendaHomeScreen(navController: NavController) {
                             HomeCompactButton(
                                 icon = Icons.Default.Home,
                                 label = "Inicio",
-                                color = Color(0xFF00E5FF)
+                                color = NeonCyan
                             ) {
                                 searchQuery = ""
                                 scope.launch { pagerState.animateScrollToPage(0) }
@@ -266,8 +274,8 @@ fun TiendaHomeScreen(navController: NavController) {
 
                             Box(
                                 modifier = Modifier
-                                    .size(52.dp)
-                                    .shadow(4.dp, CircleShape)
+                                    .size(56.dp)
+                                    .shadow(6.dp, CircleShape, spotColor = Color(0xFF7C4DFF))
                                     .clip(CircleShape)
                                     .background(Color(0xFF7C4DFF))
                                     .clickable {
@@ -288,7 +296,7 @@ fun TiendaHomeScreen(navController: NavController) {
                                 label = "Perfil",
                                 color = Color.Gray
                             ) {
-                                Toast.makeText(context, "Admin: ${user?.email}", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Sesión: ${user?.email}", Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
@@ -303,55 +311,57 @@ fun HomeCompactButton(icon: ImageVector, label: String, color: Color, onClick: (
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(14.dp))
             .clickable { onClick() }
-            .padding(8.dp)
+            .padding(10.dp)
     ) {
         Icon(icon, null, tint = color, modifier = Modifier.size(26.dp))
-        Text(label, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = color)
+        Text(label.uppercase(), fontSize = 9.sp, fontWeight = FontWeight.Black, color = color)
     }
 }
 
 @Composable
 fun SkeletonProductCard() {
-    val transition = rememberInfiniteTransition(label = "")
+    val transition = rememberInfiniteTransition(label = "skeleton")
     val alpha by transition.animateFloat(
         initialValue = 0.3f,
-        targetValue = 0.7f,
+        targetValue = 0.6f,
         animationSpec = infiniteRepeatable(
-            animation = tween(800),
+            animation = tween(1000),
             repeatMode = RepeatMode.Reverse
         ),
-        label = ""
+        label = "alpha"
     )
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(110.dp)
-            .background(Color.White, RoundedCornerShape(22.dp))
-            .padding(12.dp),
+            .height(115.dp)
+            .background(Color.White, RoundedCornerShape(26.dp))
+            .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
                 .size(85.dp)
-                .clip(RoundedCornerShape(18.dp))
+                .clip(RoundedCornerShape(20.dp))
                 .background(Color.LightGray.copy(alpha = alpha))
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.6f)
-                    .height(15.dp)
+                    .fillMaxWidth(0.7f)
+                    .height(18.dp)
+                    .clip(RoundedCornerShape(4.dp))
                     .background(Color.LightGray.copy(alpha = alpha))
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.3f)
-                    .height(15.dp)
+                    .height(14.dp)
+                    .clip(RoundedCornerShape(4.dp))
                     .background(Color.LightGray.copy(alpha = alpha))
             )
         }

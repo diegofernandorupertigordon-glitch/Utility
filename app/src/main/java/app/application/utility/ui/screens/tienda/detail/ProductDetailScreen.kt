@@ -61,7 +61,8 @@ fun ProductDetailScreen(
 
     LaunchedEffect(productId) { viewModel.loadProduct(productId) }
 
-    BaseScreen(title = "Detalles", isDark = false) {
+    // Cambiado title a "" para un look más limpio de catálogo
+    BaseScreen(title = "", isDark = false) {
         if (product == null) {
             DetailSkeleton()
         } else {
@@ -77,13 +78,13 @@ fun ProductDetailScreen(
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // --- CONTENEDOR DE IMAGEN ---
+                // --- CONTENEDOR DE IMAGEN (Estilo Frame de Lujo) ---
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(320.dp)
-                        .shadow(25.dp, RoundedCornerShape(32.dp), spotColor = NeonCyan.copy(alpha = 0.4f))
-                        .clip(RoundedCornerShape(32.dp))
+                        .height(360.dp) // Un poco más alto para elegancia
+                        .shadow(30.dp, RoundedCornerShape(40.dp), spotColor = NeonCyan.copy(alpha = 0.5f))
+                        .clip(RoundedCornerShape(40.dp))
                         .background(Color.White)
                 ) {
                     if (imageResId != null) {
@@ -103,28 +104,46 @@ fun ProductDetailScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(28.dp))
 
-                // --- TARJETA DE INFORMACIÓN ---
+                // --- TARJETA DE INFORMACIÓN PREMIUM ---
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     color = Color.White,
-                    shape = RoundedCornerShape(28.dp),
+                    shape = RoundedCornerShape(32.dp),
                     shadowElevation = 2.dp
                 ) {
-                    Column(modifier = Modifier.padding(24.dp)) {
-                        Text(product!!.nombre, fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color(0xFF2D3436))
-                        Text("$${product!!.precio}", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, color = NeonCyan)
+                    Column(modifier = Modifier.padding(26.dp)) {
+                        Text(
+                            text = product!!.nombre.uppercase(), // Mayúsculas para look de marca
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFF2D3436),
+                            letterSpacing = 1.sp
+                        )
+                        Text(
+                            text = "$${product!!.precio}",
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = NeonCyan
+                        )
 
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), color = Color(0xFFF1F5F9))
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp), color = Color(0xFFF1F5F9))
 
-                        Text(text = product!!.descripcion, fontSize = 15.sp, color = Color.Gray, lineHeight = 22.sp)
+                        Text(
+                            text = product!!.descripcion,
+                            fontSize = 16.sp,
+                            color = Color.Gray,
+                            lineHeight = 24.sp
+                        )
 
-                        Spacer(modifier = Modifier.height(20.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
 
-                        DetailRow(label = "Presentación", value = "${product!!.presentacionMl} ml")
+                        // Cambio dinámico: Usa la variable 'unidad' del modelo Product
+                        DetailRow(label = "Presentación", value = "${product!!.presentacionMl} ${product!!.unidad}")
+                        DetailRow(label = "Categoría", value = product!!.categoria)
                         DetailRow(
-                            label = "Estado",
+                            label = "Disponibilidad",
                             value = if (product!!.stock > 0) "En Stock (${product!!.stock})" else "Agotado"
                         )
                     }
@@ -132,8 +151,7 @@ fun ProductDetailScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // --- BOTÓN DE ACCIÓN CORREGIDO ---
-                // Se eliminó el parámetro 'enabled' que causaba error y se maneja con alpha y lógica interna
+                // --- BOTÓN DE ACCIÓN ---
                 Box(modifier = Modifier.alpha(if (product!!.stock > 0) 1f else 0.5f)) {
                     FuturisticButton(
                         text = if (product!!.stock > 0) "AÑADIR AL CARRITO" else "AGOTADO",
@@ -171,19 +189,24 @@ fun DetailSkeleton() {
     )
 
     Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
-        Box(modifier = Modifier.fillMaxWidth().height(320.dp).clip(RoundedCornerShape(32.dp)).background(Color.LightGray.copy(alpha = alpha)))
-        Spacer(modifier = Modifier.height(24.dp))
-        Box(modifier = Modifier.fillMaxWidth(0.7f).height(30.dp).background(Color.LightGray.copy(alpha = alpha)))
+        Box(modifier = Modifier.fillMaxWidth().height(360.dp).clip(RoundedCornerShape(40.dp)).background(Color.LightGray.copy(alpha = alpha)))
+        Spacer(modifier = Modifier.height(30.dp))
+        Box(modifier = Modifier.fillMaxWidth(0.6f).height(30.dp).background(Color.LightGray.copy(alpha = alpha)))
         Spacer(modifier = Modifier.height(12.dp))
         Box(modifier = Modifier.fillMaxWidth(0.4f).height(25.dp).background(Color.LightGray.copy(alpha = alpha)))
         Spacer(modifier = Modifier.height(30.dp))
-        Box(modifier = Modifier.fillMaxWidth().height(150.dp).clip(RoundedCornerShape(20.dp)).background(Color.LightGray.copy(alpha = alpha)))
+        Box(modifier = Modifier.fillMaxWidth().height(150.dp).clip(RoundedCornerShape(32.dp)).background(Color.LightGray.copy(alpha = alpha)))
     }
 }
 
 @Composable
 fun DetailRow(label: String, value: String) {
-    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
         Text(label, color = Color.Gray, fontSize = 14.sp)
         Text(value, fontWeight = FontWeight.Bold, color = Color(0xFF2D3436), fontSize = 14.sp)
     }

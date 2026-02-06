@@ -3,6 +3,7 @@ package app.application.utility.ui.screens.auth
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -49,8 +51,8 @@ fun LoginScreen(navController: NavController) {
     val authViewModel: AuthViewModel = viewModel()
     val firebaseError by authViewModel.error.collectAsState()
     val context = LocalContext.current
+    val NeonCyan = Color(0xFF00E5FF)
 
-    // Launcher para el resultado de Google Sign-In
     val googleLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -60,15 +62,12 @@ fun LoginScreen(navController: NavController) {
                 val account = task.getResult(ApiException::class.java)
                 account?.idToken?.let { token ->
                     authViewModel.signInWithGoogle(token) {
-                        // Navegación exitosa al Selector para refrescar el estado global
                         navController.navigate(Routes.Selector.route) {
                             popUpTo(Routes.Login.route) { inclusive = true }
                         }
                     }
                 }
-            } catch (e: ApiException) {
-                // Manejo de errores silencioso o podrías loguearlo
-            }
+            } catch (e: ApiException) { }
         }
     }
 
@@ -76,25 +75,25 @@ fun LoginScreen(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(Brush.verticalGradient(listOf(Color(0xFFF8FAFC), Color.White)))
                 .verticalScroll(rememberScrollState())
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(60.dp))
 
             // Cabecera Premium
-            Text("BIENVENIDO", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF00E5FF))
-            Text("Iniciar Sesión", fontSize = 32.sp, fontWeight = FontWeight.Black, color = Color(0xFF2D3436))
+            Text("BIENVENIDO", fontSize = 12.sp, fontWeight = FontWeight.Black, color = NeonCyan, letterSpacing = 2.sp)
+            Text("Iniciar Sesión", fontSize = 36.sp, fontWeight = FontWeight.Black, color = Color(0xFF2D3436))
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(48.dp))
 
-            // Contenedor de Formulario
             CardContainer {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
                     FuturisticTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = "Email",
+                        label = "Correo Electrónico",
                         keyboardType = KeyboardType.Email
                     )
 
@@ -105,17 +104,10 @@ fun LoginScreen(navController: NavController) {
                         keyboardType = KeyboardType.Password
                     )
 
-                    // Mostrar error de Firebase si existe
                     if (firebaseError.isNotEmpty()) {
-                        Text(
-                            text = firebaseError,
-                            color = Color.Red,
-                            fontSize = 12.sp,
-                            modifier = Modifier.padding(horizontal = 4.dp)
-                        )
+                        Text(text = firebaseError, color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 4.dp))
                     }
 
-                    // Botón de Login Tradicional
                     FuturisticButton(
                         text = "ENTRAR",
                         onClick = {
@@ -128,28 +120,13 @@ fun LoginScreen(navController: NavController) {
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    // Separador visual
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    ) {
-                        HorizontalDivider(
-                            modifier = Modifier.weight(1f),
-                            color = Color.LightGray.copy(alpha = 0.5f)
-                        )
-                        Text(
-                            " o ",
-                            color = Color.Gray,
-                            fontSize = 12.sp,
-                            modifier = Modifier.padding(horizontal = 8.dp)
-                        )
-                        HorizontalDivider(
-                            modifier = Modifier.weight(1f),
-                            color = Color.LightGray.copy(alpha = 0.5f)
-                        )
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 8.dp)) {
+                        HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray.copy(alpha = 0.4f))
+                        Text(" O ", color = Color.Gray, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 12.dp))
+                        HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray.copy(alpha = 0.4f))
                     }
 
-                    // Botón de Google Sign-In
+                    // Botón de Google Estilizado
                     FuturisticButton(
                         text = "CONTINUAR CON GOOGLE",
                         onClick = {
@@ -158,8 +135,6 @@ fun LoginScreen(navController: NavController) {
                                 .requestEmail()
                                 .build()
                             val client = GoogleSignIn.getClient(context, gso)
-
-                            // Limpiamos sesión previa de Google para obligar a elegir cuenta
                             client.signOut().addOnCompleteListener {
                                 googleLauncher.launch(client.signInIntent)
                             }
@@ -169,24 +144,18 @@ fun LoginScreen(navController: NavController) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // Enlace a Registro
             TextButton(onClick = { navController.navigate(Routes.Register.route) }) {
-                Text(
-                    "¿No tienes cuenta? Regístrate aquí",
-                    color = Color.Gray,
-                    fontWeight = FontWeight.Medium
-                )
+                Text("¿No tienes cuenta? REGÍSTRATE", color = Color.Gray, fontWeight = FontWeight.Black, fontSize = 13.sp)
             }
 
-            // Botón opcional para volver al selector sin loguearse
             TextButton(onClick = {
                 navController.navigate(Routes.Selector.route) {
                     popUpTo(Routes.Login.route) { inclusive = true }
                 }
             }) {
-                Text("VOLVER AL INICIO", color = Color(0xFF00E5FF), fontSize = 11.sp)
+                Text("VOLVER AL INICIO", color = NeonCyan, fontSize = 11.sp, fontWeight = FontWeight.Black)
             }
         }
     }

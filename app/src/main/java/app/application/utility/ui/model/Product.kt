@@ -15,7 +15,9 @@ data class Product(
     @set:PropertyName("description")
     var descripcion: String = "",
 
-    @get:PropertyName("price")
+    // Cambiamos el nombre interno para que no choque con los métodos manuales
+    @get:Exclude
+    @set:Exclude
     var precio: Double = 0.0,
 
     var presentacionMl: Int = 0,
@@ -26,16 +28,27 @@ data class Product(
     // ✨ Nuevo campo para departamentos
     var categoria: String = "🧴 Perfumería",
 
-    // 🏷️ Campo para unidad de medida (ml, gr, oz, und)
+    // 🏷️ Campo para unidad de medida
     var unidad: String = "ml"
 ) {
+    /**
+     * CRÍTICO: Maneja la entrada de datos desde Firebase (Long, Int, Double)
+     * sin que la aplicación se cierre.
+     */
     @PropertyName("price")
-    fun setPrecio(value: Any?) {
+    fun setPrecioFirebase(value: Any?) {
         this.precio = when (value) {
             is Double -> value
             is Long -> value.toDouble()
             is Float -> value.toDouble()
+            is Int -> value.toDouble()
             else -> 0.0
         }
     }
+
+    /**
+     * Getter manual para que Firebase siempre busque la etiqueta "price"
+     */
+    @PropertyName("price")
+    fun getPrecioFirebase(): Double = precio
 }

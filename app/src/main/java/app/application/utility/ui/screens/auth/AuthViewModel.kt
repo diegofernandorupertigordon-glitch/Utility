@@ -19,15 +19,23 @@ class AuthViewModel : ViewModel() {
     private val _error = MutableStateFlow("")
     val error: StateFlow<String> = _error
 
+    /**
+     * Crea o actualiza el perfil del usuario en Firestore.
+     * Mantiene la seguridad de administrador basada en tu correo personal.
+     */
     private fun createUserInFirestore(uid: String, email: String) {
         val userMap = mapOf(
             "email" to email,
             "isAdmin" to (email.lowercase() == "diegoruperti1987@hotmail.com"),
             "createdAt" to System.currentTimeMillis()
         )
+        // Usamos merge para no borrar otros campos adicionales que el usuario pueda tener
         db.collection("users").document(uid).set(userMap, SetOptions.merge())
     }
 
+    /**
+     * Inicio de sesión tradicional con Email y Password.
+     */
     fun login(email: String, password: String, onSuccess: () -> Unit) {
         if (email.isBlank() || password.length < 6) {
             _error.value = "Email o contraseña inválidos"
@@ -44,6 +52,9 @@ class AuthViewModel : ViewModel() {
             }
     }
 
+    /**
+     * Registro de nuevos usuarios.
+     */
     fun register(email: String, password: String, onSuccess: () -> Unit) {
         if (email.isBlank() || password.length < 6) {
             _error.value = "Datos inválidos (mínimo 6 caracteres)"
@@ -63,6 +74,9 @@ class AuthViewModel : ViewModel() {
             }
     }
 
+    /**
+     * Autenticación federada con Google.
+     */
     fun signInWithGoogle(idToken: String, onSuccess: () -> Unit) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential)
@@ -78,11 +92,16 @@ class AuthViewModel : ViewModel() {
             }
     }
 
+    /**
+     * Cierre de sesión total.
+     * Desvincula tanto Firebase como la instancia de Google del dispositivo.
+     */
     fun logout(context: Context, onSuccess: () -> Unit) {
         auth.signOut()
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
         val googleSignInClient = GoogleSignIn.getClient(context, gso)
 
+        // Cerramos sesión y revocamos acceso para que el selector de cuentas aparezca de nuevo
         googleSignInClient.signOut().addOnCompleteListener {
             googleSignInClient.revokeAccess().addOnCompleteListener {
                 _error.value = ""

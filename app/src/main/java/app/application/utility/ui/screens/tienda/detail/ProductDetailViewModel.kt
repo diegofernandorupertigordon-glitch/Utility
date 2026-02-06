@@ -13,17 +13,23 @@ class ProductDetailViewModel : ViewModel() {
     private val _product = MutableStateFlow<Product?>(null)
     val product: StateFlow<Product?> = _product
 
+    /**
+     * Carga los detalles de un producto específico desde Firestore.
+     * Al usar toObject(Product::class.java), se mapean automáticamente
+     * todos los campos, incluyendo los nuevos (unidad, categoría, etc.)
+     */
     fun loadProduct(productId: String) {
         db.collection("products")
             .document(productId)
             .get()
             .addOnSuccessListener { doc ->
                 if (doc.exists()) {
+                    // Mantenemos la lógica de copiar el ID del documento para asegurar la navegación
                     _product.value = doc.toObject(Product::class.java)?.copy(id = doc.id)
                 }
             }
             .addOnFailureListener {
-                // Aquí podrías manejar el error si lo deseas
+                // Se mantiene el espacio para manejo de errores
             }
     }
 }

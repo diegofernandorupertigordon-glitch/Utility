@@ -7,7 +7,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-// 🌙 Esquema oscuro (el que ya tenías)
+// 🌙 Esquema oscuro (Futurista)
 private val NeonDarkScheme = darkColorScheme(
     background = DeepSpace,
     surface = Nebula,
@@ -19,7 +19,7 @@ private val NeonDarkScheme = darkColorScheme(
     onPrimary = Color.Black
 )
 
-// ☀️ Esquema claro (derivado, sin romper colores)
+// ☀️ Esquema claro (Elegante y limpio)
 private val NeonLightScheme = lightColorScheme(
     background = Color(0xFFF4F6FF),
     surface = Color.White,
@@ -33,15 +33,13 @@ private val NeonLightScheme = lightColorScheme(
 
 /**
  * 🎨 Tema principal de la app
- * - Detecta automáticamente modo oscuro del sistema
- * - No rompe diseño existente
+ * Mantiene la identidad visual Neon tanto en modo claro como oscuro.
  */
 @Composable
 fun SaludoTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-
     val colors = if (darkTheme) {
         NeonDarkScheme
     } else {

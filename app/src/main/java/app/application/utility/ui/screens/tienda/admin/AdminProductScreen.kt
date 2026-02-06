@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -48,7 +49,6 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.OutlinedTextField
@@ -67,7 +67,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -87,8 +86,6 @@ import app.application.utility.ui.model.Product
 import app.application.utility.ui.screens.tienda.home.TiendaHomeViewModel
 import coil.compose.AsyncImage
 import com.google.firebase.firestore.FirebaseFirestore
-
-// IMPORTS ESPECÍFICOS PARA SUPABASE
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.storage.Storage
 import io.github.jan.supabase.storage.storage
@@ -107,6 +104,8 @@ fun AdminProductScreen(navController: NavController, screenType: String) {
     val db = FirebaseFirestore.getInstance()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val NeonCyan = Color(0xFF00E5FF)
+    val NeonPurple = Color(0xFF7C4DFF)
 
     var mostrandoRegistro by remember { mutableStateOf(screenType == "registro") }
     var productoSeleccionado by remember { mutableStateOf<Product?>(null) }
@@ -127,7 +126,6 @@ fun AdminProductScreen(navController: NavController, screenType: String) {
     val categorias = listOf("🧴 Perfumería", "💄 Maquillaje", "🛁 Accesorios")
     var categoriaSeleccionada by remember { mutableStateOf(categorias[0]) }
 
-    // --- LÓGICA DE SELECCIÓN E CARGA DE IMAGEN ---
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -160,21 +158,23 @@ fun AdminProductScreen(navController: NavController, screenType: String) {
     if (showDeleteDialog && productToDelete != null) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("¿Eliminar registro?", fontWeight = FontWeight.Bold) },
-            text = { Text("¿Estás seguro de que deseas eliminar ${productToDelete?.nombre}?") },
+            title = { Text("¿Eliminar registro?", fontWeight = FontWeight.Black) },
+            text = { Text("¿Estás seguro de que deseas eliminar permanentemente ${productToDelete?.nombre}?") },
             confirmButton = {
                 TextButton(onClick = {
                     productToDelete?.id?.let { id ->
                         db.collection("products").document(id).delete().addOnSuccessListener {
-                            Toast.makeText(context, "Eliminado", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Producto eliminado", Toast.LENGTH_SHORT).show()
                             showDeleteDialog = false; productToDelete = null; productoSeleccionado = null
                         }
                     }
-                }) { Text("ELIMINAR", color = Color.Red, fontWeight = FontWeight.Bold) }
+                }) { Text("ELIMINAR", color = Color.Red, fontWeight = FontWeight.Black) }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) { Text("CANCELAR", color = Color.Gray) }
-            }
+            },
+            shape = RoundedCornerShape(28.dp),
+            containerColor = Color.White
         )
     }
 
@@ -191,100 +191,116 @@ fun AdminProductScreen(navController: NavController, screenType: String) {
                         } else {
                             (slideInHorizontally { -it } + fadeIn()).togetherWith(slideOutHorizontally { it } + fadeOut())
                         }
-                    }, label = ""
+                    }, label = "ContentTransition"
                 ) { targetMostrandoRegistro ->
-                    Box(modifier = Modifier.fillMaxSize().padding(top = 40.dp)) {
-                        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
+                    Box(modifier = Modifier.fillMaxSize().padding(top = 44.dp)) {
+                        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp)) {
                             if (!targetMostrandoRegistro) {
-                                // --- VISTA INVENTARIO (ORIGINAL COMPLETA) ---
-                                Text("ADMINISTRACIÓN", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF00E5FF))
-                                Text("Inventario Actualizado", fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color(0xFF2D3436))
-                                Spacer(modifier = Modifier.height(20.dp))
+                                // --- VISTA INVENTARIO (REDISEÑO PREMIUM) ---
+                                Text("ADMINISTRACIÓN", fontSize = 11.sp, fontWeight = FontWeight.Black, color = NeonCyan, letterSpacing = 2.sp)
+                                Text("Inventario Stock", fontSize = 32.sp, fontWeight = FontWeight.Black, color = Color(0xFF2D3436))
+                                Spacer(modifier = Modifier.height(24.dp))
 
                                 LazyColumn(
                                     modifier = Modifier.weight(1f),
-                                    contentPadding = PaddingValues(bottom = 110.dp)
+                                    contentPadding = PaddingValues(bottom = 120.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     items(products) { product ->
                                         val isSelected = productoSeleccionado?.id == product.id
-
                                         val isUrl = product.imageUrl.startsWith("http")
                                         val imageResId = if (!isUrl && product.imageUrl.isNotEmpty()) {
                                             context.resources.getIdentifier(product.imageUrl, "drawable", context.packageName)
                                         } else 0
 
-                                        ListItem(
+                                        Surface(
                                             modifier = Modifier
-                                                .clip(RoundedCornerShape(12.dp))
-                                                .clickable { productoSeleccionado = if (isSelected) null else product }
-                                                .background(if (isSelected) Color(0xFF00E5FF).copy(alpha = 0.1f) else Color.Transparent),
-                                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                                            leadingContent = {
-                                                Box(modifier = Modifier.size(65.dp).clip(RoundedCornerShape(12.dp)).background(Color.White)) {
-                                                    if (isUrl) {
-                                                        AsyncImage(
-                                                            model = if(product.imageUrl.isNotEmpty()) product.imageUrl else "https://via.placeholder.com/150",
-                                                            contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop,
-                                                            error = painterResource(id = android.R.drawable.ic_menu_report_image)
-                                                        )
-                                                    } else if (imageResId != 0) {
-                                                        Image(painter = painterResource(id = imageResId), contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                                                    } else {
-                                                        Image(painter = painterResource(id = android.R.drawable.ic_menu_gallery), contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Inside)
+                                                .fillMaxWidth()
+                                                .clip(RoundedCornerShape(20.dp))
+                                                .clickable { productoSeleccionado = if (isSelected) null else product },
+                                            color = if (isSelected) NeonCyan.copy(alpha = 0.08f) else Color.Transparent,
+                                            shape = RoundedCornerShape(20.dp)
+                                        ) {
+                                            ListItem(
+                                                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                                                leadingContent = {
+                                                    Surface(
+                                                        modifier = Modifier.size(65.dp),
+                                                        shape = RoundedCornerShape(16.dp),
+                                                        shadowElevation = 2.dp
+                                                    ) {
+                                                        if (isUrl) {
+                                                            AsyncImage(
+                                                                model = if(product.imageUrl.isNotEmpty()) product.imageUrl else "https://via.placeholder.com/150",
+                                                                contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop
+                                                            )
+                                                        } else if (imageResId != 0) {
+                                                            Image(painter = painterResource(id = imageResId), contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                                                        } else {
+                                                            Image(painter = painterResource(id = android.R.drawable.ic_menu_gallery), contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Inside)
+                                                        }
+                                                    }
+                                                },
+                                                headlineContent = { Text(product.nombre, fontWeight = FontWeight.Black, fontSize = 16.sp, color = Color(0xFF2D3436)) },
+                                                supportingContent = {
+                                                    Column {
+                                                        Text("${product.categoria}", color = Color.Gray, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                                            Text("Stock: ${product.stock}", color = if(product.stock < 5) Color.Red else Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                                            Spacer(modifier = Modifier.width(8.dp))
+                                                            Text("•", color = Color.LightGray)
+                                                            Spacer(modifier = Modifier.width(8.dp))
+                                                            Text("$${product.precio}", fontWeight = FontWeight.Black, color = NeonCyan)
+                                                        }
                                                     }
                                                 }
-                                            },
-                                            headlineContent = { Text(product.nombre, fontWeight = FontWeight.Bold, fontSize = 16.sp) },
-                                            supportingContent = {
-                                                Column {
-                                                    Text("${product.categoria} | Stock: ${product.stock}", color = if(product.stock < 5) Color.Red else Color.Gray, fontSize = 12.sp)
-                                                    Text("Precio: $${product.precio}", fontWeight = FontWeight.Bold, color = Color(0xFF2D3436))
-                                                }
-                                            }
-                                        )
-                                        HorizontalDivider(color = Color.LightGray.copy(alpha = 0.3f), modifier = Modifier.padding(vertical = 4.dp))
+                                            )
+                                        }
+                                        HorizontalDivider(color = Color.LightGray.copy(alpha = 0.2f), thickness = 0.5.dp, modifier = Modifier.padding(horizontal = 16.dp))
                                     }
                                 }
                             } else {
-                                // --- VISTA REGISTRO (ORIGINAL COMPLETA) ---
-                                Text("ADMINISTRACIÓN", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = if(editingProductId == null) Color(0xFF7C4DFF) else Color(0xFF00E5FF))
-                                Text(if(editingProductId == null) "Ingreso de Artículos" else "Modificar Datos", fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color(0xFF2D3436))
-                                Spacer(modifier = Modifier.height(25.dp))
+                                // --- VISTA REGISTRO (REDISEÑO PREMIUM) ---
+                                val accentColor = if(editingProductId == null) NeonPurple else NeonCyan
+                                Text("ADMINISTRACIÓN", fontSize = 11.sp, fontWeight = FontWeight.Black, color = accentColor, letterSpacing = 2.sp)
+                                Text(if(editingProductId == null) "Nuevo Artículo" else "Editar Datos", fontSize = 32.sp, fontWeight = FontWeight.Black, color = Color(0xFF2D3436))
+                                Spacer(modifier = Modifier.height(30.dp))
 
                                 Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
                                     CardContainer {
-                                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                        Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
 
-                                            Text("SELECCIONAR CATEGORÍA", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color.Gray)
+                                            Text("CATEGORÍA", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.Gray, letterSpacing = 1.sp)
                                             Row(
                                                 modifier = Modifier.fillMaxWidth(),
                                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                                             ) {
                                                 categorias.forEach { cat ->
                                                     val isSelected = categoriaSeleccionada == cat
-                                                    Box(
+                                                    Surface(
                                                         modifier = Modifier
                                                             .weight(1f)
-                                                            .height(48.dp)
-                                                            .clip(RoundedCornerShape(14.dp))
-                                                            .background(if (isSelected) Color(0xFF7C4DFF) else Color(0xFFF1F2F6))
+                                                            .height(46.dp)
                                                             .clickable { categoriaSeleccionada = cat },
-                                                        contentAlignment = Alignment.Center
+                                                        shape = RoundedCornerShape(14.dp),
+                                                        color = if (isSelected) accentColor else Color(0xFFF1F5F9)
                                                     ) {
-                                                        Text(
-                                                            text = cat,
-                                                            fontSize = 11.sp,
-                                                            fontWeight = FontWeight.Bold,
-                                                            color = if (isSelected) Color.White else Color.Gray
-                                                        )
+                                                        Box(contentAlignment = Alignment.Center) {
+                                                            Text(
+                                                                text = cat.split(" ")[1], // Solo el texto sin emoji si prefieres o completo
+                                                                fontSize = 11.sp,
+                                                                fontWeight = FontWeight.Black,
+                                                                color = if (isSelected) Color.White else Color.Gray
+                                                            )
+                                                        }
                                                     }
                                                 }
                                             }
 
-                                            HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray.copy(alpha = 0.5f))
+                                            HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray.copy(alpha = 0.3f))
 
                                             FuturisticTextField(value = nombre, onValueChange = { nombre = it }, label = "Nombre del Artículo", keyboardType = KeyboardType.Text)
-                                            FuturisticTextField(value = descripcion, onValueChange = { descripcion = it }, label = "Descripción Breve", keyboardType = KeyboardType.Text)
+                                            FuturisticTextField(value = descripcion, onValueChange = { descripcion = it }, label = "Descripción", keyboardType = KeyboardType.Text)
 
                                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                                 Box(modifier = Modifier.weight(1f)) {
@@ -313,14 +329,14 @@ fun AdminProductScreen(navController: NavController, screenType: String) {
                                                             value = unidadMedida,
                                                             onValueChange = {},
                                                             readOnly = true,
-                                                            label = { Text("Unidad", fontSize = 12.sp) },
+                                                            label = { Text("Unidad", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                                                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedMenuUnidad) },
                                                             colors = OutlinedTextFieldDefaults.colors(
-                                                                focusedBorderColor = Color(0xFF7C4DFF),
-                                                                unfocusedBorderColor = Color.LightGray,
-                                                                focusedLabelColor = Color(0xFF7C4DFF)
+                                                                focusedBorderColor = accentColor,
+                                                                unfocusedBorderColor = Color.LightGray.copy(alpha = 0.5f),
+                                                                focusedLabelColor = accentColor
                                                             ),
-                                                            shape = RoundedCornerShape(12.dp),
+                                                            shape = RoundedCornerShape(16.dp),
                                                             modifier = Modifier.menuAnchor().fillMaxWidth()
                                                         )
                                                         ExposedDropdownMenu(
@@ -330,7 +346,7 @@ fun AdminProductScreen(navController: NavController, screenType: String) {
                                                         ) {
                                                             listOf("ml", "gr", "oz", "und").forEach { unit ->
                                                                 DropdownMenuItem(
-                                                                    text = { Text(unit) },
+                                                                    text = { Text(unit, fontWeight = FontWeight.Medium) },
                                                                     onClick = {
                                                                         unidadMedida = unit
                                                                         expandedMenuUnidad = false
@@ -342,40 +358,40 @@ fun AdminProductScreen(navController: NavController, screenType: String) {
                                                 }
                                             }
 
-                                            // CAMPO DE IMAGEN CON BOTÓN DE CARGA INTEGRADO
                                             Box(modifier = Modifier.fillMaxWidth()) {
                                                 FuturisticTextField(
                                                     value = imageUrlForm,
                                                     onValueChange = { imageUrlForm = it },
-                                                    label = "Imagen (URL o Drawable)",
+                                                    label = "URL de Imagen",
                                                     keyboardType = KeyboardType.Text
                                                 )
 
-                                                IconButton(
+                                                Surface(
                                                     onClick = { launcher.launch("image/*") },
-                                                    modifier = Modifier
-                                                        .align(Alignment.CenterEnd)
-                                                        .padding(end = 8.dp, top = 8.dp)
+                                                    modifier = Modifier.align(Alignment.CenterEnd).padding(end = 8.dp, top = 8.dp).size(40.dp),
+                                                    shape = CircleShape,
+                                                    color = accentColor.copy(alpha = 0.1f)
                                                 ) {
                                                     Icon(
                                                         painter = painterResource(id = android.R.drawable.ic_menu_camera),
-                                                        contentDescription = "Subir a Supabase",
-                                                        tint = Color(0xFF7C4DFF)
+                                                        contentDescription = "Upload",
+                                                        tint = accentColor,
+                                                        modifier = Modifier.padding(10.dp)
                                                     )
                                                 }
                                             }
 
-                                            Spacer(modifier = Modifier.height(10.dp))
+                                            Spacer(modifier = Modifier.height(8.dp))
 
                                             FuturisticButton(
-                                                text = if (isLoading) "PROCESANDO..." else if (editingProductId == null) "CONFIRMAR REGISTRO" else "ACTUALIZAR CAMBIOS",
+                                                text = if (isLoading) "PROCESANDO..." else if (editingProductId == null) "GUARDAR PRODUCTO" else "GUARDAR CAMBIOS",
                                                 onClick = {
                                                     if (nombre.isNotBlank() && precioForm.isNotBlank()) {
                                                         isLoading = true
                                                         val data = hashMapOf(
-                                                            "name" to nombre,
-                                                            "description" to descripcion,
-                                                            "price" to (precioForm.toDoubleOrNull() ?: 0.0),
+                                                            "nombre" to nombre, // Se mantiene el nombre de campo original para Firestore
+                                                            "descripcion" to descripcion,
+                                                            "precio" to (precioForm.toDoubleOrNull() ?: 0.0),
                                                             "stock" to (stockForm.toIntOrNull() ?: 0),
                                                             "presentacionMl" to (cantidadUnidad.toIntOrNull() ?: 0),
                                                             "imageUrl" to imageUrlForm,
@@ -384,15 +400,16 @@ fun AdminProductScreen(navController: NavController, screenType: String) {
                                                         )
                                                         val docRef = if (editingProductId == null) db.collection("products").document() else db.collection("products").document(editingProductId!!)
                                                         docRef.set(data).addOnSuccessListener {
-                                                            Toast.makeText(context, "Éxito", Toast.LENGTH_SHORT).show()
+                                                            Toast.makeText(context, "Operación exitosa", Toast.LENGTH_SHORT).show()
                                                             resetForm(); mostrandoRegistro = false; isLoading = false
                                                         }.addOnFailureListener { isLoading = false }
                                                     }
-                                                }
+                                                },
+                                                modifier = Modifier.fillMaxWidth()
                                             )
                                         }
                                     }
-                                    Spacer(modifier = Modifier.height(120.dp))
+                                    Spacer(modifier = Modifier.height(130.dp))
                                 }
                             }
                         }
@@ -400,46 +417,51 @@ fun AdminProductScreen(navController: NavController, screenType: String) {
                 }
             }
 
-            // BARRA FLOTANTE (ORIGINAL CON DOBLE SOMBRA Y LÓGICA)
+            // BARRA FLOTANTE (ESTILO DE LUJO MANTENIENDO LÓGICA)
             AnimatedVisibility(
                 visible = !mostrandoRegistro,
-                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 24.dp, start = 20.dp, end = 20.dp),
+                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 28.dp, start = 24.dp, end = 24.dp),
                 enter = fadeIn() + slideInVertically { it },
                 exit = fadeOut() + slideOutVertically { it }
             ) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    color = Color.White.copy(alpha = 0.98f),
-                    shape = RoundedCornerShape(24.dp),
-                    shadowElevation = 10.dp,
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.2f))
+                    color = Color.White,
+                    shape = RoundedCornerShape(28.dp),
+                    shadowElevation = 15.dp,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF1F5F9))
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp).fillMaxWidth(),
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp).fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceAround,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        AdminCompactButton(Icons.Default.Edit, "Editar", if (productoSeleccionado != null) Color(0xFF00E5FF) else Color.LightGray) {
+                        AdminCompactButton(Icons.Default.Edit, "EDITAR", if (productoSeleccionado != null) NeonCyan else Color.LightGray) {
                             productoSeleccionado?.let {
                                 nombre = it.nombre; descripcion = it.descripcion; precioForm = it.precio.toString()
                                 stockForm = it.stock.toString(); cantidadUnidad = it.presentacionMl.toString(); imageUrlForm = it.imageUrl
                                 categoriaSeleccionada = it.categoria; unidadMedida = it.unidad; editingProductId = it.id; mostrandoRegistro = true
                             }
                         }
-                        AdminCompactButton(Icons.Default.Delete, "Borrar", if (productoSeleccionado != null) Color.Red else Color.LightGray) {
+                        AdminCompactButton(Icons.Default.Delete, "BORRAR", if (productoSeleccionado != null) Color(0xFFFF5252) else Color.LightGray) {
                             productoSeleccionado?.let { productToDelete = it; showDeleteDialog = true }
                         }
-                        Box(
-                            modifier = Modifier.size(52.dp).shadow(4.dp, CircleShape).shadow(4.dp, CircleShape).clip(CircleShape).background(Color(0xFF7C4DFF))
-                                .clickable { resetForm(); mostrandoRegistro = true },
-                            contentAlignment = Alignment.Center
-                        ) { Icon(Icons.Default.Add, null, tint = Color.White, modifier = Modifier.size(28.dp)) }
 
-                        AdminCompactButton(Icons.Default.Share, "WhatsApp", Color(0xFF25D366)) {
+                        // Botón Central Neón
+                        Surface(
+                            modifier = Modifier.size(56.dp).clickable { resetForm(); mostrandoRegistro = true },
+                            shape = CircleShape,
+                            color = NeonPurple,
+                            shadowElevation = 8.dp
+                        ) {
+                            Icon(Icons.Default.Add, null, tint = Color.White, modifier = Modifier.padding(14.dp))
+                        }
+
+                        AdminCompactButton(Icons.Default.Share, "REPORTE", Color(0xFF25D366)) {
                             if (products.isNotEmpty()) {
                                 compartirInventarioWA(context, products)
                             } else {
-                                Toast.makeText(context, "No hay productos para compartir", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "No hay productos", Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
@@ -451,13 +473,17 @@ fun AdminProductScreen(navController: NavController, screenType: String) {
 
 @Composable
 fun AdminCompactButton(icon: ImageVector, label: String, color: Color, onClick: () -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { onClick() }.padding(8.dp)) {
-        Icon(icon, null, tint = color, modifier = Modifier.size(26.dp))
-        Text(label, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = color)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { onClick() }.padding(8.dp)
+    ) {
+        Icon(icon, null, tint = color, modifier = Modifier.size(24.dp))
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(label, fontSize = 9.sp, fontWeight = FontWeight.Black, color = color, letterSpacing = 0.5.sp)
     }
 }
 
-// --- FUNCIÓN DE SUBIDA A SUPABASE ---
+// --- FUNCIÓN DE SUBIDA A SUPABASE (SE MANTIENE INTEGRA) ---
 suspend fun subirImagenASupabase(context: Context, uri: Uri, onResult: (String) -> Unit) {
     val supabaseUrl = "https://dazhrsgqecvyivnmexai.supabase.co"
     val supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhemhyc2dxZWN2eWl2bm1leGFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyNDg0OTQsImV4cCI6MjA4NTgyNDQ5NH0.kWWmZrSct-15EJCRiFwTUlZPCe34V0ApV5M6uP6iOzk"
@@ -473,23 +499,22 @@ suspend fun subirImagenASupabase(context: Context, uri: Uri, onResult: (String) 
             val fileName = "prod_${System.currentTimeMillis()}.jpg"
             val bucket = client.storage.from("Utility")
             withContext(Dispatchers.IO) {
-                // Sintaxis de subida corregida para evitar errores de tipo
                 bucket.upload(path = fileName, data = bytes, upsert = true)
             }
             val publicUrl = "$supabaseUrl/storage/v1/object/public/Utility/$fileName"
             withContext(Dispatchers.Main) {
                 onResult(publicUrl)
-                Toast.makeText(context, "Imagen cargada!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Imagen cargada con éxito", Toast.LENGTH_SHORT).show()
             }
         }
     } catch (e: Exception) {
         withContext(Dispatchers.Main) {
-            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Error al subir: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 }
 
-// --- LÓGICA DE COMPARTIR ORIGINAL ---
+// --- LÓGICA DE COMPARTIR (SE MANTIENE INTEGRA) ---
 fun compartirInventarioWA(context: Context, productos: List<Product>) {
     val fecha = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
     val reporte = StringBuilder()

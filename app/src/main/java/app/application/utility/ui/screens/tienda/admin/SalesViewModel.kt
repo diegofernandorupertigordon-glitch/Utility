@@ -21,7 +21,7 @@ class SalesViewModel : ViewModel() {
     }
 
     private fun fetchSales() {
-        // Mantenemos tu lógica: Últimas 100 ventas ordenadas por fecha
+        // Mantenemos la lógica original: Últimas 100 ventas ordenadas por fecha
         db.collection("sales")
             .orderBy("fecha", Query.Direction.DESCENDING)
             .limit(100)
@@ -38,8 +38,6 @@ class SalesViewModel : ViewModel() {
                             val items = doc.get("items") as? List<Map<String, Any>> ?: emptyList()
 
                             // 💰 PARSEO BLINDADO:
-                            // Firebase a veces devuelve Numbers que Kotlin no sabe si son Double o Long.
-                            // Convertir a String y luego a Double es la forma más segura de no perder decimales.
                             val totalRaw = doc.get("total")
                             val totalParsed = totalRaw?.toString()?.toDoubleOrNull() ?: 0.0
 
@@ -51,7 +49,6 @@ class SalesViewModel : ViewModel() {
                                 items = items
                             )
                         } catch (e: Exception) {
-                            // Si un documento está mal formado, lo ignoramos y no cerramos la app
                             null
                         }
                     }
@@ -62,7 +59,6 @@ class SalesViewModel : ViewModel() {
 
     /**
      * Calcula ingresos totales sumando la lista actual en memoria.
-     * Es instantáneo porque no vuelve a consultar la base de datos.
      */
     fun getTotalIngresos(): Double = _sales.value.sumOf { it.total }
 

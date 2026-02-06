@@ -20,6 +20,10 @@ class TiendaHomeViewModel : ViewModel() {
         listenProducts()
     }
 
+    /**
+     * Escucha la colección de productos en tiempo real.
+     * Mapea automáticamente los campos (incluyendo unidad y categoría).
+     */
     private fun listenProducts() {
         listener = db.collection("products")
             .addSnapshotListener { snapshot, error ->
@@ -30,6 +34,7 @@ class TiendaHomeViewModel : ViewModel() {
                 }
 
                 val list = snapshot.documents.mapNotNull { doc ->
+                    // Se usa toObject para capturar todos los campos y se inyecta el ID del doc
                     doc.toObject(Product::class.java)?.copy(id = doc.id)
                 }
 
@@ -39,6 +44,6 @@ class TiendaHomeViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        listener?.remove()
+        listener?.remove() // Evita fugas de memoria al cerrar la app
     }
 }

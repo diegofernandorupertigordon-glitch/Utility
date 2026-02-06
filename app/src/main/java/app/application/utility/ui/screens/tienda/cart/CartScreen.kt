@@ -59,7 +59,6 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel) {
     val NeonCyan = Color(0xFF00E5FF)
     val SoftGray = Color(0xFFF8FAFC)
 
-    // Eliminamos el título automático de BaseScreen como en las otras pantallas
     BaseScreen(title = "", isDark = false) {
         Column(
             modifier = Modifier
@@ -67,7 +66,6 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel) {
                 .background(Brush.verticalGradient(listOf(SoftGray, Color.White)))
         ) {
             if (items.isEmpty()) {
-                // --- VISTA CARRITO VACÍO ---
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -95,7 +93,6 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel) {
                     )
                 }
             } else {
-                // --- HEADER DEL CARRITO ---
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -112,7 +109,6 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel) {
                     }
                 }
 
-                // --- LISTA DE PRODUCTOS ---
                 LazyColumn(
                     modifier = Modifier
                         .weight(1f)
@@ -136,10 +132,9 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel) {
                                 modifier = Modifier.padding(12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                // Miniatura del Producto
                                 Box(
                                     modifier = Modifier
-                                        .size(80.dp)
+                                        .size(85.dp)
                                         .clip(RoundedCornerShape(18.dp))
                                         .background(SoftGray)
                                 ) {
@@ -164,21 +159,20 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel) {
 
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = item.product.nombre,
-                                        fontWeight = FontWeight.Bold,
+                                        text = item.product.nombre.uppercase(),
+                                        fontWeight = FontWeight.Black,
                                         color = Color(0xFF2D3436),
-                                        fontSize = 15.sp,
+                                        fontSize = 14.sp,
                                         maxLines = 1
                                     )
                                     Text(
-                                        text = "$${item.product.precio} c/u",
+                                        text = "${item.product.presentacionMl} ${item.product.unidad} • $${item.product.precio} c/u",
                                         color = Color.Gray,
-                                        fontSize = 12.sp
+                                        fontSize = 11.sp
                                     )
 
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Spacer(modifier = Modifier.height(10.dp))
 
-                                    // --- SELECTOR DE CANTIDAD CON VALIDACIÓN ---
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -186,11 +180,11 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel) {
                                         Surface(
                                             shape = CircleShape,
                                             color = SoftGray,
-                                            modifier = Modifier.size(28.dp).clickable {
+                                            modifier = Modifier.size(30.dp).clickable {
                                                 viewModel.removeProduct(item.product.id)
                                             }
                                         ) {
-                                            Icon(Icons.Default.Remove, null, modifier = Modifier.padding(4.dp), tint = Color(0xFF2D3436))
+                                            Icon(Icons.Default.Remove, null, modifier = Modifier.padding(6.dp), tint = Color(0xFF2D3436))
                                         }
 
                                         Text(
@@ -203,29 +197,26 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel) {
                                         Surface(
                                             shape = CircleShape,
                                             color = NeonCyan.copy(alpha = 0.15f),
-                                            modifier = Modifier.size(28.dp).clickable {
-                                                // Aquí validamos el stock retornado por el ViewModel
+                                            modifier = Modifier.size(30.dp).clickable {
                                                 val added = viewModel.addProduct(item.product)
                                                 if (!added) {
                                                     Toast.makeText(context, "Stock máximo alcanzado", Toast.LENGTH_SHORT).show()
                                                 }
                                             }
                                         ) {
-                                            Icon(Icons.Default.Add, null, modifier = Modifier.padding(4.dp), tint = NeonCyan)
+                                            Icon(Icons.Default.Add, null, modifier = Modifier.padding(6.dp), tint = NeonCyan)
                                         }
                                     }
                                 }
 
-                                // Precio Subtotal por Item
                                 Column(horizontalAlignment = Alignment.End) {
                                     Text(
                                         text = "$${String.format(Locale.US, "%.2f", item.product.precio * item.quantity)}",
                                         fontWeight = FontWeight.Black,
                                         color = Color(0xFF2D3436),
-                                        fontSize = 16.sp
+                                        fontSize = 17.sp
                                     )
 
-                                    // Botón para eliminar todo el registro de ese producto
                                     IconButton(onClick = {
                                         viewModel.deleteItemCompletely(item.product.id)
                                     }) {
@@ -242,7 +233,6 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel) {
                     }
                 }
 
-                // --- RESUMEN Y CHECKOUT ---
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     color = Color(0xFF1A1F26),

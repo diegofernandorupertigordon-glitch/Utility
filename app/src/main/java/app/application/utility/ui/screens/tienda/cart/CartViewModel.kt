@@ -85,6 +85,10 @@ class CartViewModel : ViewModel() {
         return _cartItems.value.sumOf { it.product.precio * it.quantity.toDouble() }
     }
 
+    /**
+     * Procesa la compra utilizando una transacción de Firestore para asegurar
+     * la integridad del stock y registrar la venta.
+     */
     fun checkout(onSuccess: () -> Unit, onError: (String) -> Unit) {
         val itemsToProcess = _cartItems.value
         val userEmail = auth.currentUser?.email ?: "Anónimo"
@@ -122,9 +126,12 @@ class CartViewModel : ViewModel() {
                 "fecha" to System.currentTimeMillis(),
                 "items" to itemsToProcess.map {
                     mapOf(
+                        "id" to it.product.id,
                         "nombre" to it.product.nombre,
                         "cantidad" to it.quantity,
-                        "precioUnitario" to it.product.precio
+                        "precioUnitario" to it.product.precio,
+                        "presentacion" to "${it.product.presentacionMl} ${it.product.unidad}",
+                        "categoria" to it.product.categoria
                     )
                 }
             )

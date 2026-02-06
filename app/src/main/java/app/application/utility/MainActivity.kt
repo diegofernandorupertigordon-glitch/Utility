@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.rememberNavController
 import app.application.saludo.ui.theme.SaludoTheme
 import app.application.utility.ui.navigation.NavGraph
-import com.google.firebase.FirebaseApp   // 👈 IMPORTANTE
+import com.google.firebase.FirebaseApp
 
 // 🚀 Activity principal (punto de entrada de la aplicación)
 class MainActivity : ComponentActivity() {
@@ -18,10 +18,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 🔥 INICIALIZA FIREBASE (CLAVE)
+        // 🔥 INICIALIZA FIREBASE (CLAVE PARA EL FUNCIONAMIENTO DE AUTH Y FIRESTORE)
         FirebaseApp.initializeApp(this)
 
-        // 🖥️ Habilita diseño de pantalla completa
+        // 🖥️ Habilita diseño de pantalla completa (Edge-to-Edge)
         enableEdgeToEdge()
 
         // 🎨 Define la interfaz usando Jetpack Compose
@@ -35,16 +35,16 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun UtilityApp() {
 
-    // 🎨 Aplica el tema Material 3 a toda la app
+    // 🎨 Aplica el tema personalizado (Colores Neón y Tipografía Premium)
     SaludoTheme {
 
-        // 🧭 Controlador de navegación
+        // 🧭 Controlador de navegación global
         val navController = rememberNavController()
 
-        // 🌌 Contenedor visual global
+        // 🌌 Contenedor visual futurista (Fondo y Degradados)
         FuturisticContainer {
 
-            // 🗺️ Navegación completa
+            // 🗺️ Grafo de navegación que gestiona todas las pantallas de la app
             NavGraph(navController)
         }
     }

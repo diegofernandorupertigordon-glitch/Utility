@@ -26,6 +26,10 @@ class AdminProductViewModel : ViewModel() {
         listenProducts()
     }
 
+    /**
+     * Verifica permisos de administrador.
+     * Prioriza tu correo personal para acceso garantizado.
+     */
     private fun checkAdmin() {
         val user = auth.currentUser
         val adminEmail = "diegoruperti1987@hotmail.com"
@@ -35,11 +39,11 @@ class AdminProductViewModel : ViewModel() {
             return
         }
 
-        // Primero verificamos por email (Acceso inmediato para ti)
+        // Verificación inmediata por Email
         if (user.email?.lowercase() == adminEmail) {
             _isAdmin.value = true
         } else {
-            // Verificación secundaria en la colección de usuarios si fuera necesario
+            // Verificación de respaldo en base de datos
             db.collection("users").document(user.uid).get()
                 .addOnSuccessListener { doc ->
                     _isAdmin.value = doc.getBoolean("isAdmin") == true
@@ -50,13 +54,16 @@ class AdminProductViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Escucha cambios en la colección de productos en tiempo real.
+     */
     private fun listenProducts() {
         listener = db.collection("products")
             .addSnapshotListener { snapshot, error ->
                 if (error != null || snapshot == null) return@addSnapshotListener
 
                 val list = snapshot.documents.mapNotNull { doc ->
-                    // 🔑 Convertimos el documento a objeto y asignamos manualmente el ID del documento
+                    // Mapeo automático de campos (incluyendo unidad, categoria, etc.)
                     val p = doc.toObject(Product::class.java)
                     p?.id = doc.id
                     p
@@ -65,33 +72,48 @@ class AdminProductViewModel : ViewModel() {
             }
     }
 
+    /**
+     * Agrega un nuevo producto.
+     * Firestore genera el ID automáticamente.
+     */
     fun addProduct(product: Product) {
-        // Firebase ignorará el campo 'id' gracias a @get:Exclude
         db.collection("products").add(product)
     }
 
+    /**
+     * Actualiza un producto existente.
+     */
     fun updateProduct(product: Product) {
         if (product.id.isBlank()) return
-        // Actualiza el documento usando su ID sin crear un campo 'id' adentro
         db.collection("products").document(product.id).set(product)
     }
 
+    /**
+     * Elimina un producto de la base de datos.
+     */
     fun deleteProduct(productId: String) {
         if (productId.isBlank()) return
         db.collection("products").document(productId).delete()
     }
 
-    // ✅ FUNCIONES DE REPORTES (Dashboard)
+    // --- FUNCIONES DE ANALÍTICA PARA EL DASHBOARD ---
+
+    /**
+     * Calcula las ganancias brutas basadas en los productos vendidos.
+     */
     fun calcularGananciasTotales(): Double {
         return _products.value.sumOf { it.precio * it.vendidos }
     }
 
+    /**
+     * Retorna el conteo total de unidades vendidas históricamente.
+     */
     fun obtenerTotalProductosVendidos(): Int {
         return _products.value.sumOf { it.vendidos }
     }
 
     override fun onCleared() {
         super.onCleared()
-        listener?.remove()
+        listener?.remove() // Limpieza del listener para evitar fugas de memoria
     }
 }
