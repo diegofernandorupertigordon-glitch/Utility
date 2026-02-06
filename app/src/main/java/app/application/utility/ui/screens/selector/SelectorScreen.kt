@@ -36,6 +36,7 @@ import app.application.utility.ui.components.BaseScreen
 import app.application.utility.ui.navigation.Routes
 import app.application.utility.ui.screens.auth.AuthViewModel
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -49,34 +50,35 @@ fun SelectorScreen(navController: NavController) {
         user?.email?.substringBefore("@")?.uppercase() ?: "INVITADO"
     }
 
-    BaseScreen(title = "Selector", isDark = false) {
+    // Título vacío para eliminar la barra superior y la flecha
+    BaseScreen(title = "", isDark = false) {
         Column(
             modifier = Modifier.fillMaxSize().padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
             Text("BIENVENIDO,", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
             Text(userName, fontSize = 32.sp, fontWeight = FontWeight.Black, color = Color(0xFF2D3436))
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Tarjeta Utility
+            // Tarjeta Utility - Aumentada a 180.dp
             LocalGlowImageCard(
                 title = "HERRAMIENTAS UTILITY",
                 subtitle = "Gestión y Cálculo",
-                imageUrl = "https://images.unsplash.com/photo-1581092160562-40aa08e78837",
+                imageUrl = "https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=800",
                 neonColor = Color(0xFF00E5FF),
                 onClick = { navController.navigate(Routes.Main.route) }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Tarjeta Tienda (Actualizada con tu marca)
+            // Tarjeta Tienda - Aumentada a 180.dp
             LocalGlowImageCard(
                 title = "PERFUMERÍA INTEGRAL",
                 subtitle = "Catálogo Exclusivo",
-                imageUrl = "https://images.unsplash.com/photo-1541643600914-78b084683601",
+                imageUrl = "https://images.unsplash.com/photo-1541643600914-78b084683601?q=80&w=800",
                 neonColor = Color(0xFFFFAB00),
                 onClick = {
                     if (user == null) {
@@ -115,19 +117,35 @@ fun SelectorScreen(navController: NavController) {
 
 @Composable
 fun LocalGlowImageCard(title: String, subtitle: String, imageUrl: String, neonColor: Color, onClick: () -> Unit) {
+    val context = LocalContext.current
+
     Card(
-        modifier = Modifier.fillMaxWidth().height(150.dp).clickable { onClick() },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(180.dp) // Tamaño aumentado
+            .clickable { onClick() },
         shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.cardElevation(6.dp)
+        elevation = CardDefaults.cardElevation(8.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            AsyncImage(model = imageUrl, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-            Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(0.7f)))))
-            Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Bottom) {
-                Box(modifier = Modifier.width(35.dp).height(3.dp).clip(RoundedCornerShape(2.dp)).background(neonColor))
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(title, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Black)
-                Text(subtitle, color = Color.White.copy(alpha = 0.7f), fontSize = 11.sp)
+            // Optimización de carga: crossfade y caché
+            AsyncImage(
+                model = ImageRequest.Builder(context)
+                    .data(imageUrl)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+
+            Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(0.75f)))))
+
+            Column(modifier = Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.Bottom) {
+                Box(modifier = Modifier.width(45.dp).height(4.dp).clip(RoundedCornerShape(2.dp)).background(neonColor))
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(title, color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Black)
+                Text(subtitle, color = Color.White.copy(alpha = 0.8f), fontSize = 13.sp)
             }
         }
     }

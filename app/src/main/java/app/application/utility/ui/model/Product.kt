@@ -24,7 +24,10 @@ data class Product(
     var imageUrl: String = "",
 
     // ✨ Nuevo campo para departamentos
-    var categoria: String = "🧴 Perfumería"
+    var categoria: String = "🧴 Perfumería",
+
+    // 🏷️ Campo para unidad de medida (ml, gr, oz, und)
+    var unidad: String = "ml"
 ) {
     @PropertyName("price")
     fun setPrecio(value: Any?) {

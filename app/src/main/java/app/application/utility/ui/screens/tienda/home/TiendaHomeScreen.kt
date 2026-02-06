@@ -1,11 +1,16 @@
 package app.application.utility.ui.screens.tienda.home
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,7 +22,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -57,6 +61,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -86,7 +91,7 @@ fun TiendaHomeScreen(navController: NavController) {
 
     val isLoading = products.isEmpty()
 
-    BaseScreen(title = "Perfumería Integral", isDark = false) {
+    BaseScreen(title = "", isDark = false) {
         Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
             Scaffold(
                 containerColor = Color(0xFFF8FAFC)
@@ -205,7 +210,7 @@ fun TiendaHomeScreen(navController: NavController) {
                                 modifier = Modifier.fillMaxSize(),
                                 verticalArrangement = Arrangement.spacedBy(12.dp),
                                 contentPadding = PaddingValues(
-                                    bottom = 16.dp,
+                                    bottom = 110.dp,
                                     start = 20.dp,
                                     end = 20.dp
                                 )
@@ -226,54 +231,45 @@ fun TiendaHomeScreen(navController: NavController) {
                 }
             }
 
+            // BARRA FLOTANTE
             if (isAdmin) {
-                Box(
+                AnimatedVisibility(
+                    visible = true,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .background(Color.White)
+                        .padding(bottom = 24.dp, start = 20.dp, end = 20.dp),
+                    enter = fadeIn() + slideInVertically { it },
+                    exit = fadeOut() + slideOutVertically { it }
                 ) {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        tonalElevation = 12.dp,
-                        color = Color.White,
-                        shadowElevation = 25.dp,
-                        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+                        color = Color.White.copy(alpha = 0.98f),
+                        shape = RoundedCornerShape(24.dp),
+                        shadowElevation = 10.dp,
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.2f))
                     ) {
                         Row(
                             modifier = Modifier
-                                .navigationBarsPadding()
-                                .padding(
-                                    top = 6.dp,
-                                    bottom = 6.dp,
-                                    start = 24.dp,
-                                    end = 24.dp
-                                )
+                                .padding(horizontal = 12.dp, vertical = 10.dp)
                                 .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
+                            horizontalArrangement = Arrangement.SpaceAround,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .clickable {
-                                        searchQuery = ""
-                                        scope.launch { pagerState.animateScrollToPage(0) }
-                                    }
-                                    .padding(4.dp)
+                            HomeCompactButton(
+                                icon = Icons.Default.Home,
+                                label = "Inicio",
+                                color = Color(0xFF00E5FF)
                             ) {
-                                Icon(Icons.Default.Home, null, tint = Color(0xFF00E5FF), modifier = Modifier.size(26.dp))
-                                Text("Inicio", fontSize = 10.sp, color = Color(0xFF00E5FF), fontWeight = FontWeight.Bold)
+                                searchQuery = ""
+                                scope.launch { pagerState.animateScrollToPage(0) }
                             }
 
                             Box(
                                 modifier = Modifier
-                                    .size(56.dp)
-                                    .shadow(12.dp, CircleShape)
+                                    .size(52.dp)
+                                    .shadow(4.dp, CircleShape)
                                     .clip(CircleShape)
-                                    .background(Color(0xFF00E5FF))
+                                    .background(Color(0xFF7C4DFF))
                                     .clickable {
                                         navController.navigate(Routes.AdminProducts.route)
                                     },
@@ -282,28 +278,37 @@ fun TiendaHomeScreen(navController: NavController) {
                                 Icon(
                                     imageVector = Icons.Default.Settings,
                                     contentDescription = "Admin",
-                                    tint = Color.Black,
-                                    modifier = Modifier.size(32.dp)
+                                    tint = Color.White,
+                                    modifier = Modifier.size(28.dp)
                                 )
                             }
 
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .clickable {
-                                        Toast.makeText(context, "Admin: ${user?.email}", Toast.LENGTH_SHORT).show()
-                                    }
-                                    .padding(4.dp)
+                            HomeCompactButton(
+                                icon = Icons.Default.Person,
+                                label = "Perfil",
+                                color = Color.Gray
                             ) {
-                                Icon(Icons.Default.Person, null, tint = Color.Gray, modifier = Modifier.size(26.dp))
-                                Text("Perfil", fontSize = 10.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
+                                Toast.makeText(context, "Admin: ${user?.email}", Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+fun HomeCompactButton(icon: ImageVector, label: String, color: Color, onClick: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onClick() }
+            .padding(8.dp)
+    ) {
+        Icon(icon, null, tint = color, modifier = Modifier.size(26.dp))
+        Text(label, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = color)
     }
 }
 

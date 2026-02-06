@@ -3,6 +3,7 @@ package app.application.utility.ui.screens.tienda.cart
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,9 +18,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,7 +59,8 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel) {
     val NeonCyan = Color(0xFF00E5FF)
     val SoftGray = Color(0xFFF8FAFC)
 
-    BaseScreen(title = "Mi Carrito", isDark = false) {
+    // Eliminamos el título automático de BaseScreen como en las otras pantallas
+    BaseScreen(title = "", isDark = false) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -94,7 +99,7 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 20.dp),
+                        .padding(horizontal = 24.dp, vertical = 24.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Bottom
                 ) {
@@ -112,7 +117,7 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel) {
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 20.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                     contentPadding = PaddingValues(bottom = 20.dp)
                 ) {
                     items(items) { item ->
@@ -124,8 +129,8 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel) {
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
                             color = Color.White,
-                            shape = RoundedCornerShape(20.dp),
-                            shadowElevation = 2.dp
+                            shape = RoundedCornerShape(24.dp),
+                            shadowElevation = 4.dp
                         ) {
                             Row(
                                 modifier = Modifier.padding(12.dp),
@@ -134,8 +139,8 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel) {
                                 // Miniatura del Producto
                                 Box(
                                     modifier = Modifier
-                                        .size(70.dp)
-                                        .clip(RoundedCornerShape(14.dp))
+                                        .size(80.dp)
+                                        .clip(RoundedCornerShape(18.dp))
                                         .background(SoftGray)
                                 ) {
                                     if (imageResId != null) {
@@ -162,29 +167,75 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel) {
                                         text = item.product.nombre,
                                         fontWeight = FontWeight.Bold,
                                         color = Color(0xFF2D3436),
+                                        fontSize = 15.sp,
                                         maxLines = 1
                                     )
                                     Text(
-                                        text = "${item.quantity} x $${item.product.precio}",
+                                        text = "$${item.product.precio} c/u",
                                         color = Color.Gray,
-                                        fontSize = 13.sp
+                                        fontSize = 12.sp
                                     )
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    // --- SELECTOR DE CANTIDAD CON VALIDACIÓN ---
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        Surface(
+                                            shape = CircleShape,
+                                            color = SoftGray,
+                                            modifier = Modifier.size(28.dp).clickable {
+                                                viewModel.removeProduct(item.product.id)
+                                            }
+                                        ) {
+                                            Icon(Icons.Default.Remove, null, modifier = Modifier.padding(4.dp), tint = Color(0xFF2D3436))
+                                        }
+
+                                        Text(
+                                            text = "${item.quantity}",
+                                            fontWeight = FontWeight.Black,
+                                            fontSize = 16.sp,
+                                            color = Color(0xFF2D3436)
+                                        )
+
+                                        Surface(
+                                            shape = CircleShape,
+                                            color = NeonCyan.copy(alpha = 0.15f),
+                                            modifier = Modifier.size(28.dp).clickable {
+                                                // Aquí validamos el stock retornado por el ViewModel
+                                                val added = viewModel.addProduct(item.product)
+                                                if (!added) {
+                                                    Toast.makeText(context, "Stock máximo alcanzado", Toast.LENGTH_SHORT).show()
+                                                }
+                                            }
+                                        ) {
+                                            Icon(Icons.Default.Add, null, modifier = Modifier.padding(4.dp), tint = NeonCyan)
+                                        }
+                                    }
                                 }
 
-                                Text(
-                                    text = "$${String.format(Locale.US, "%.2f", item.product.precio * item.quantity)}",
-                                    fontWeight = FontWeight.Black,
-                                    color = Color(0xFF2D3436),
-                                    fontSize = 16.sp
-                                )
-
-                                IconButton(onClick = { viewModel.removeProduct(item.product.id) }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Delete,
-                                        contentDescription = "Eliminar",
-                                        tint = Color.Red.copy(0.5f),
-                                        modifier = Modifier.size(20.dp)
+                                // Precio Subtotal por Item
+                                Column(horizontalAlignment = Alignment.End) {
+                                    Text(
+                                        text = "$${String.format(Locale.US, "%.2f", item.product.precio * item.quantity)}",
+                                        fontWeight = FontWeight.Black,
+                                        color = Color(0xFF2D3436),
+                                        fontSize = 16.sp
                                     )
+
+                                    // Botón para eliminar todo el registro de ese producto
+                                    IconButton(onClick = {
+                                        viewModel.deleteItemCompletely(item.product.id)
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = "Eliminar",
+                                            tint = Color.Red.copy(0.3f),
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -194,7 +245,7 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel) {
                 // --- RESUMEN Y CHECKOUT ---
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    color = Color(0xFF1A1F26), // Gris Grafito Profundo
+                    color = Color(0xFF1A1F26),
                     shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
                 ) {
                     Column(modifier = Modifier.padding(28.dp)) {
@@ -213,7 +264,6 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel) {
                                 )
                             }
 
-                            // Un pequeño badge decorativo
                             Surface(
                                 color = NeonCyan.copy(alpha = 0.2f),
                                 shape = RoundedCornerShape(8.dp)

@@ -19,20 +19,61 @@ class CartViewModel : ViewModel() {
     private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
     val cartItems: StateFlow<List<CartItem>> = _cartItems
 
-    fun addProduct(product: Product) {
+    /**
+     * Añade un producto verificando que no supere el stock disponible.
+     * Retorna true si se pudo añadir, false si no hay stock suficiente.
+     */
+    fun addProduct(product: Product): Boolean {
         val currentItems = _cartItems.value.toMutableList()
         val index = currentItems.indexOfFirst { it.product.id == product.id }
 
         if (index >= 0) {
             val item = currentItems[index]
-            currentItems[index] = item.copy(quantity = item.quantity + 1)
+            // Solo permite incrementar si la cantidad actual es menor al stock disponible
+            if (item.quantity < product.stock) {
+                currentItems[index] = item.copy(quantity = item.quantity + 1)
+                _cartItems.value = currentItems
+                return true
+            } else {
+                return false // Límite de stock alcanzado
+            }
         } else {
-            currentItems.add(CartItem(product, 1))
+            // Verificación inicial para el primer elemento
+            if (product.stock > 0) {
+                currentItems.add(CartItem(product, 1))
+                _cartItems.value = currentItems
+                return true
+            } else {
+                return false
+            }
         }
-        _cartItems.value = currentItems
     }
 
+    /**
+     * Modificado para restar la cantidad de uno en uno.
+     * Si la cantidad es 1, elimina el producto del carrito.
+     */
     fun removeProduct(productId: String) {
+        val currentItems = _cartItems.value.toMutableList()
+        val index = currentItems.indexOfFirst { it.product.id == productId }
+
+        if (index >= 0) {
+            val item = currentItems[index]
+            if (item.quantity > 1) {
+                // Restar uno
+                currentItems[index] = item.copy(quantity = item.quantity - 1)
+            } else {
+                // Eliminar si solo queda uno
+                currentItems.removeAt(index)
+            }
+            _cartItems.value = currentItems
+        }
+    }
+
+    /**
+     * Nueva función para eliminar el producto completo sin importar la cantidad.
+     */
+    fun deleteItemCompletely(productId: String) {
         _cartItems.value = _cartItems.value.filter { it.product.id != productId }
     }
 

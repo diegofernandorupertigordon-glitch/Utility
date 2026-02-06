@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -13,14 +14,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -56,12 +55,15 @@ fun SalesHistoryScreen(navController: NavController) {
             .take(3)
     }
 
-    BaseScreen(title = "Reporte de Movimientos") { // NOMBRE ACTUALIZADO
+    // BaseScreen con título vacío para eliminar la barra superior y la flecha de volver
+    BaseScreen(title = "", isDark = false) {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
 
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color(0xFF00E5FF))
-            }
+            // Reemplazo de la flecha: Título manual alineado con el estilo de la app
+            Spacer(modifier = Modifier.height(24.dp))
+            Text("ADMINISTRACIÓN", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF00E5FF))
+            Text("Reporte de Movimientos", fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color(0xFF2D3436))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // --- RESUMEN DE CAJA ---
             Card(
