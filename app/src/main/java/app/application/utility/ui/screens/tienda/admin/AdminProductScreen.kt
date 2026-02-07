@@ -535,7 +535,7 @@ fun AdminCompactButton(icon: ImageVector, label: String, color: Color, onClick: 
     }
 }
 
-// --- FUNCIÓN DE SUBIDA A SUPABASE (SE MANTIENE INTEGRA) ---
+// --- FUNCIÓN DE SUBIDA A SUPABASE ---
 suspend fun subirImagenASupabase(context: Context, uri: Uri, onResult: (String) -> Unit) {
     val supabaseUrl = "https://dazhrsgqecvyivnmexai.supabase.co"
     val supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhemhyc2dxZWN2eWl2bm1leGFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyNDg0OTQsImV4cCI6MjA4NTgyNDQ5NH0.kWWmZrSct-15EJCRiFwTUlZPCe34V0ApV5M6uP6iOzk"

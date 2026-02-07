@@ -29,7 +29,6 @@ class AuthViewModel : ViewModel() {
             "isAdmin" to (email.lowercase() == "diegoruperti1987@hotmail.com"),
             "createdAt" to System.currentTimeMillis()
         )
-        // Usamos merge para no borrar otros campos adicionales que el usuario pueda tener
         db.collection("users").document(uid).set(userMap, SetOptions.merge())
     }
 
