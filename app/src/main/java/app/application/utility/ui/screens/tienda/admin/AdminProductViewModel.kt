@@ -82,10 +82,23 @@ class AdminProductViewModel : ViewModel() {
 
     /**
      * Actualiza un producto existente.
+     * SE CORRIGE: Usa update con llaves en inglés para no borrar "vendidos" ni otros campos.
      */
     fun updateProduct(product: Product) {
         if (product.id.isBlank()) return
-        db.collection("products").document(product.id).set(product)
+
+        val updates = hashMapOf<String, Any>(
+            "name" to product.nombre,
+            "description" to product.descripcion,
+            "price" to product.precio,
+            "stock" to product.stock,
+            "presentacionMl" to product.presentacionMl,
+            "imageUrl" to product.imageUrl,
+            "categoria" to product.categoria,
+            "unidad" to product.unidad
+        )
+
+        db.collection("products").document(product.id).update(updates)
     }
 
     /**

@@ -388,21 +388,34 @@ fun AdminProductScreen(navController: NavController, screenType: String) {
                                                 onClick = {
                                                     if (nombre.isNotBlank() && precioForm.isNotBlank()) {
                                                         isLoading = true
+                                                        // Sincronizamos las llaves con los nombres en Firebase (en inglés)
                                                         val data = hashMapOf(
-                                                            "nombre" to nombre, // Se mantiene el nombre de campo original para Firestore
-                                                            "descripcion" to descripcion,
-                                                            "precio" to (precioForm.toDoubleOrNull() ?: 0.0),
+                                                            "name" to nombre,
+                                                            "description" to descripcion,
+                                                            "price" to (precioForm.toDoubleOrNull() ?: 0.0),
                                                             "stock" to (stockForm.toIntOrNull() ?: 0),
                                                             "presentacionMl" to (cantidadUnidad.toIntOrNull() ?: 0),
                                                             "imageUrl" to imageUrlForm,
                                                             "categoria" to categoriaSeleccionada,
                                                             "unidad" to unidadMedida
                                                         )
+
                                                         val docRef = if (editingProductId == null) db.collection("products").document() else db.collection("products").document(editingProductId!!)
-                                                        docRef.set(data).addOnSuccessListener {
+
+                                                        // Usamos update en edición para NO borrar campos como "vendidos"
+                                                        val tarea = if (editingProductId == null) {
+                                                            docRef.set(data)
+                                                        } else {
+                                                            docRef.update(data as Map<String, Any>)
+                                                        }
+
+                                                        tarea.addOnSuccessListener {
                                                             Toast.makeText(context, "Operación exitosa", Toast.LENGTH_SHORT).show()
                                                             resetForm(); mostrandoRegistro = false; isLoading = false
-                                                        }.addOnFailureListener { isLoading = false }
+                                                        }.addOnFailureListener {
+                                                            isLoading = false
+                                                            Toast.makeText(context, "Error al guardar", Toast.LENGTH_SHORT).show()
+                                                        }
                                                     }
                                                 },
                                                 modifier = Modifier.fillMaxWidth()
@@ -514,36 +527,36 @@ suspend fun subirImagenASupabase(context: Context, uri: Uri, onResult: (String) 
     }
 }
 
-// --- LÓGICA DE COMPARTIR (SE MANTIENE INTEGRA) ---
-fun compartirInventarioWA(context: Context, productos: List<Product>) {
-    val fecha = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
-    val reporte = StringBuilder()
-    reporte.append("📦 *REPORTE DE INVENTARIO*\n")
-    reporte.append("📅 Fecha: $fecha\n")
-    reporte.append("------------------------------------------\n\n")
+    // --- LÓGICA DE COMPARTIR (SE MANTIENE INTEGRA) ---
+    fun compartirInventarioWA(context: Context, productos: List<Product>) {
+        val fecha = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+        val reporte = StringBuilder()
+        reporte.append("📦 *REPORTE DE INVENTARIO*\n")
+        reporte.append("📅 Fecha: $fecha\n")
+        reporte.append("------------------------------------------\n\n")
 
-    productos.groupBy { it.categoria }.forEach { (categoria, lista) ->
-        reporte.append("📌 *${categoria.uppercase()}*\n")
-        lista.forEach { p ->
-            val alerta = if(p.stock < 5) "⚠️" else "✅"
-            reporte.append("$alerta *${p.nombre}* (${p.presentacionMl}${p.unidad})\n")
-            reporte.append("   Stock: ${p.stock} | Precio: $${p.precio}\n")
+        productos.groupBy { it.categoria }.forEach { (categoria, lista) ->
+            reporte.append("📌 *${categoria.uppercase()}*\n")
+            lista.forEach { p ->
+                val alerta = if(p.stock < 5) "⚠️" else "✅"
+                reporte.append("$alerta *${p.nombre}* (${p.presentacionMl}${p.unidad})\n")
+                reporte.append("   Stock: ${p.stock} | Precio: $${p.precio}\n")
+            }
+            reporte.append("\n")
         }
-        reporte.append("\n")
-    }
-    reporte.append("------------------------------------------\n")
-    reporte.append("_Generado desde Admin App_")
+        reporte.append("------------------------------------------\n")
+        reporte.append("_Generado desde Admin App_")
 
-    val sendIntent = Intent(Intent.ACTION_SEND).apply {
-        type = "text/plain"
-        putExtra(Intent.EXTRA_TEXT, reporte.toString())
+        val sendIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, reporte.toString())
+        }
+        val whatsappIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, reporte.toString())
+            setPackage("com.whatsapp")
+        }
+        try { context.startActivity(whatsappIntent) } catch (e: Exception) {
+            context.startActivity(Intent.createChooser(sendIntent, "Compartir vía:"))
+        }
     }
-    val whatsappIntent = Intent(Intent.ACTION_SEND).apply {
-        type = "text/plain"
-        putExtra(Intent.EXTRA_TEXT, reporte.toString())
-        setPackage("com.whatsapp")
-    }
-    try { context.startActivity(whatsappIntent) } catch (e: Exception) {
-        context.startActivity(Intent.createChooser(sendIntent, "Compartir vía:"))
-    }
-}

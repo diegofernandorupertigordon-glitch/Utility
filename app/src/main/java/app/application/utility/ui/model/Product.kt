@@ -15,7 +15,7 @@ data class Product(
     @set:PropertyName("description")
     var descripcion: String = "",
 
-    // Cambiamos el nombre interno para que no choque con los métodos manuales
+    // Precio excluido del mapeo directo para usar los métodos manuales abajo
     @get:Exclude
     @set:Exclude
     var precio: Double = 0.0,
@@ -33,7 +33,7 @@ data class Product(
 ) {
     /**
      * CRÍTICO: Maneja la entrada de datos desde Firebase (Long, Int, Double)
-     * sin que la aplicación se cierre.
+     * vinculándolo a la etiqueta "price".
      */
     @PropertyName("price")
     fun setPrecioFirebase(value: Any?) {
@@ -47,7 +47,7 @@ data class Product(
     }
 
     /**
-     * Getter manual para que Firebase siempre busque la etiqueta "price"
+     * Getter manual para que Firebase siempre busque y escriba la etiqueta "price"
      */
     @PropertyName("price")
     fun getPrecioFirebase(): Double = precio
