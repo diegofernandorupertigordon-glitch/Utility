@@ -102,7 +102,7 @@ fun TiendaHomeScreen(navController: NavController) {
                         .fillMaxSize()
                 ) {
 
-                    // --- HEADER PREMIUM ---
+                    // --- HEADER PREMIUM (CORREGIDO PARA EVITAR CHOQUE) ---
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -110,18 +110,43 @@ fun TiendaHomeScreen(navController: NavController) {
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column {
-                            Text("DEPARTAMENTOS", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = NeonCyan, letterSpacing = 1.sp)
-                            Text("Perfumería Integral", fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color(0xFF2D3436))
+                        // Usamos weight(1f) para que la columna de texto respete el espacio del botón
+                        Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                            Text(
+                                text = "DEPARTAMENTOS",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = NeonCyan,
+                                letterSpacing = 1.sp
+                            )
+                            Text(
+                                text = "Perfumería Integral",
+                                fontSize = 28.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color(0xFF2D3436),
+                                maxLines = 2, // Permite que baje a una segunda línea si es necesario
+                                lineHeight = 32.sp
+                            )
                         }
+
+                        // Botón del Carrito se mantiene integro
                         IconButton(
                             onClick = { navController.navigate(Routes.Cart.route) },
                             modifier = Modifier
                                 .size(48.dp)
-                                .shadow(8.dp, RoundedCornerShape(14.dp), spotColor = Color(0xFFFFAB00).copy(alpha = 0.5f))
+                                .shadow(
+                                    elevation = 8.dp,
+                                    shape = RoundedCornerShape(14.dp),
+                                    spotColor = Color(0xFFFFAB00).copy(alpha = 0.5f)
+                                )
                                 .background(Color(0xFFFFF9E6), RoundedCornerShape(14.dp))
                         ) {
-                            Icon(Icons.Default.ShoppingCart, null, tint = Color(0xFFFFAB00), modifier = Modifier.size(24.dp))
+                            Icon(
+                                imageVector = Icons.Default.ShoppingCart,
+                                contentDescription = null,
+                                tint = Color(0xFFFFAB00),
+                                modifier = Modifier.size(24.dp)
+                            )
                         }
                     }
 

@@ -96,7 +96,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun AdminProductScreen(navController: NavController, screenType: String) {
     val viewModel: TiendaHomeViewModel = viewModel()
@@ -196,71 +196,110 @@ fun AdminProductScreen(navController: NavController, screenType: String) {
                     Box(modifier = Modifier.fillMaxSize().padding(top = 44.dp)) {
                         Column(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp)) {
                             if (!targetMostrandoRegistro) {
-                                // --- VISTA INVENTARIO (REDISEÑO PREMIUM) ---
+                                // --- VISTA INVENTARIO (REDISEÑO PREMIUM CON CATEGORÍAS AGRUPADAS) ---
                                 Text("ADMINISTRACIÓN", fontSize = 11.sp, fontWeight = FontWeight.Black, color = NeonCyan, letterSpacing = 2.sp)
-                                Text("Inventario Stock", fontSize = 32.sp, fontWeight = FontWeight.Black, color = Color(0xFF2D3436))
+                                Text("Inventario", fontSize = 32.sp, fontWeight = FontWeight.Black, color = Color(0xFF2D3436))
                                 Spacer(modifier = Modifier.height(24.dp))
+
+                                // Agrupación dinámica para diferenciar las secciones
+                                val groupedProducts = products.groupBy { it.categoria }
 
                                 LazyColumn(
                                     modifier = Modifier.weight(1f),
                                     contentPadding = PaddingValues(bottom = 120.dp),
                                     verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    items(products) { product ->
-                                        val isSelected = productoSeleccionado?.id == product.id
-                                        val isUrl = product.imageUrl.startsWith("http")
-                                        val imageResId = if (!isUrl && product.imageUrl.isNotEmpty()) {
-                                            context.resources.getIdentifier(product.imageUrl, "drawable", context.packageName)
-                                        } else 0
-
-                                        Surface(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clip(RoundedCornerShape(20.dp))
-                                                .clickable { productoSeleccionado = if (isSelected) null else product },
-                                            color = if (isSelected) NeonCyan.copy(alpha = 0.08f) else Color.Transparent,
-                                            shape = RoundedCornerShape(20.dp)
-                                        ) {
-                                            ListItem(
-                                                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                                                leadingContent = {
-                                                    Surface(
-                                                        modifier = Modifier.size(65.dp),
-                                                        shape = RoundedCornerShape(16.dp),
-                                                        shadowElevation = 2.dp
-                                                    ) {
-                                                        if (isUrl) {
-                                                            AsyncImage(
-                                                                model = if(product.imageUrl.isNotEmpty()) product.imageUrl else "https://via.placeholder.com/150",
-                                                                contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop
-                                                            )
-                                                        } else if (imageResId != 0) {
-                                                            Image(painter = painterResource(id = imageResId), contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                                                        } else {
-                                                            Image(painter = painterResource(id = android.R.drawable.ic_menu_gallery), contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Inside)
-                                                        }
-                                                    }
-                                                },
-                                                headlineContent = { Text(product.nombre, fontWeight = FontWeight.Black, fontSize = 16.sp, color = Color(0xFF2D3436)) },
-                                                supportingContent = {
-                                                    Column {
-                                                        Text("${product.categoria}", color = Color.Gray, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                                            Text("Stock: ${product.stock}", color = if(product.stock < 5) Color.Red else Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                                                            Spacer(modifier = Modifier.width(8.dp))
-                                                            Text("•", color = Color.LightGray)
-                                                            Spacer(modifier = Modifier.width(8.dp))
-                                                            Text("$${product.precio}", fontWeight = FontWeight.Black, color = NeonCyan)
-                                                        }
-                                                    }
-                                                }
-                                            )
+                                    groupedProducts.forEach { (categoria, listaDeProductos) ->
+                                        // Encabezado de Categoría (Sticky Header)
+                                        stickyHeader {
+                                            Surface(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                color = Color(0xFFF8FAFC)
+                                            ) {
+                                                Text(
+                                                    text = categoria.uppercase(),
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Black,
+                                                    color = NeonCyan,
+                                                    letterSpacing = 1.5.sp,
+                                                    modifier = Modifier.padding(vertical = 12.dp, horizontal = 4.dp)
+                                                )
+                                            }
                                         }
-                                        HorizontalDivider(color = Color.LightGray.copy(alpha = 0.2f), thickness = 0.5.dp, modifier = Modifier.padding(horizontal = 16.dp))
+
+                                        items(listaDeProductos) { product ->
+                                            val isSelected = productoSeleccionado?.id == product.id
+                                            val isUrl = product.imageUrl.startsWith("http")
+                                            val imageResId = if (!isUrl && product.imageUrl.isNotEmpty()) {
+                                                context.resources.getIdentifier(product.imageUrl, "drawable", context.packageName)
+                                            } else 0
+
+                                            Surface(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clip(RoundedCornerShape(20.dp))
+                                                    .clickable { productoSeleccionado = if (isSelected) null else product },
+                                                color = if (isSelected) NeonCyan.copy(alpha = 0.08f) else Color.Transparent,
+                                                shape = RoundedCornerShape(20.dp)
+                                            ) {
+                                                ListItem(
+                                                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                                                    leadingContent = {
+                                                        Surface(
+                                                            modifier = Modifier.size(65.dp),
+                                                            shape = RoundedCornerShape(16.dp),
+                                                            shadowElevation = 2.dp
+                                                        ) {
+                                                            if (isUrl) {
+                                                                AsyncImage(
+                                                                    model = if(product.imageUrl.isNotEmpty()) product.imageUrl else "https://via.placeholder.com/150",
+                                                                    contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop
+                                                                )
+                                                            } else if (imageResId != 0) {
+                                                                Image(painter = painterResource(id = imageResId), contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                                                            } else {
+                                                                Image(painter = painterResource(id = android.R.drawable.ic_menu_gallery), contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Inside)
+                                                            }
+                                                        }
+                                                    },
+                                                    headlineContent = { Text(product.nombre, fontWeight = FontWeight.Black, fontSize = 16.sp, color = Color(0xFF2D3436)) },
+                                                    supportingContent = {
+                                                        Column {
+                                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                                Text(
+                                                                    text = "Stock: ${product.stock}",
+                                                                    color = if(product.stock < 5) Color.Red else Color.Gray,
+                                                                    fontSize = 12.sp,
+                                                                    fontWeight = FontWeight.Bold
+                                                                )
+                                                                Spacer(modifier = Modifier.width(8.dp))
+                                                                Text("•", color = Color.LightGray)
+                                                                Spacer(modifier = Modifier.width(8.dp))
+                                                                Text(
+                                                                    text = "${product.presentacionMl} ${product.unidad}",
+                                                                    color = Color.Gray,
+                                                                    fontSize = 12.sp
+                                                                )
+                                                                Spacer(modifier = Modifier.width(8.dp))
+                                                                Text("•", color = Color.LightGray)
+                                                                Spacer(modifier = Modifier.width(8.dp))
+                                                                // Se añade .toInt() para mostrar 160 en lugar de 160.0
+                                                                Text(
+                                                                    text = "$${product.precio.toInt()}",
+                                                                    fontWeight = FontWeight.Black,
+                                                                    color = NeonCyan
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                )
+                                            }
+                                            HorizontalDivider(color = Color.LightGray.copy(alpha = 0.2f), thickness = 0.5.dp, modifier = Modifier.padding(horizontal = 16.dp))
+                                        }
                                     }
                                 }
                             } else {
-                                // --- VISTA REGISTRO (REDISEÑO PREMIUM) ---
+                                // --- VISTA REGISTRO (REDISEÑO PREMIUM ÍNTEGRO) ---
                                 val accentColor = if(editingProductId == null) NeonPurple else NeonCyan
                                 Text("ADMINISTRACIÓN", fontSize = 11.sp, fontWeight = FontWeight.Black, color = accentColor, letterSpacing = 2.sp)
                                 Text(if(editingProductId == null) "Nuevo Artículo" else "Editar Datos", fontSize = 32.sp, fontWeight = FontWeight.Black, color = Color(0xFF2D3436))
@@ -287,7 +326,7 @@ fun AdminProductScreen(navController: NavController, screenType: String) {
                                                     ) {
                                                         Box(contentAlignment = Alignment.Center) {
                                                             Text(
-                                                                text = cat.split(" ")[1], // Solo el texto sin emoji si prefieres o completo
+                                                                text = cat.split(" ")[1],
                                                                 fontSize = 11.sp,
                                                                 fontWeight = FontWeight.Black,
                                                                 color = if (isSelected) Color.White else Color.Gray
@@ -528,35 +567,35 @@ suspend fun subirImagenASupabase(context: Context, uri: Uri, onResult: (String) 
 }
 
     // --- LÓGICA DE COMPARTIR (SE MANTIENE INTEGRA) ---
-    fun compartirInventarioWA(context: Context, productos: List<Product>) {
-        val fecha = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
-        val reporte = StringBuilder()
-        reporte.append("📦 *REPORTE DE INVENTARIO*\n")
-        reporte.append("📅 Fecha: $fecha\n")
-        reporte.append("------------------------------------------\n\n")
+fun compartirInventarioWA(context: Context, productos: List<Product>) {
+    val fecha = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+    val reporte = StringBuilder()
+    reporte.append("📦 *REPORTE DE INVENTARIO*\n")
+    reporte.append("📅 Fecha: $fecha\n")
+    reporte.append("------------------------------------------\n\n")
 
-        productos.groupBy { it.categoria }.forEach { (categoria, lista) ->
-            reporte.append("📌 *${categoria.uppercase()}*\n")
-            lista.forEach { p ->
-                val alerta = if(p.stock < 5) "⚠️" else "✅"
-                reporte.append("$alerta *${p.nombre}* (${p.presentacionMl}${p.unidad})\n")
-                reporte.append("   Stock: ${p.stock} | Precio: $${p.precio}\n")
-            }
-            reporte.append("\n")
+    productos.groupBy { it.categoria }.forEach { (categoria, lista) ->
+        reporte.append("📌 *${categoria.uppercase()}*\n")
+        lista.forEach { p ->
+            val alerta = if(p.stock < 5) "⚠️" else "✅"
+            reporte.append("$alerta *${p.nombre}* (${p.presentacionMl}${p.unidad})\n")
+            reporte.append("   Stock: ${p.stock} | Precio: $${p.precio}\n")
         }
-        reporte.append("------------------------------------------\n")
-        reporte.append("_Generado desde Admin App_")
-
-        val sendIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, reporte.toString())
-        }
-        val whatsappIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, reporte.toString())
-            setPackage("com.whatsapp")
-        }
-        try { context.startActivity(whatsappIntent) } catch (e: Exception) {
-            context.startActivity(Intent.createChooser(sendIntent, "Compartir vía:"))
-        }
+        reporte.append("\n")
     }
+    reporte.append("------------------------------------------\n")
+    reporte.append("_Generado desde Admin App_")
+
+    val sendIntent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_TEXT, reporte.toString())
+    }
+    val whatsappIntent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_TEXT, reporte.toString())
+        setPackage("com.whatsapp")
+    }
+    try { context.startActivity(whatsappIntent) } catch (e: Exception) {
+        context.startActivity(Intent.createChooser(sendIntent, "Compartir vía:"))
+    }
+}
