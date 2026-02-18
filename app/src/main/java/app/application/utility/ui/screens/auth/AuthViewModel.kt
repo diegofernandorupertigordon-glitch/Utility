@@ -74,7 +74,7 @@ class AuthViewModel : ViewModel() {
     }
 
     /**
-     * Autenticación federada con Google.
+     * Autenticación con Google.
      */
     fun signInWithGoogle(idToken: String, onSuccess: () -> Unit) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)

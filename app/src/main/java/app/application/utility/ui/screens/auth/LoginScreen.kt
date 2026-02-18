@@ -128,7 +128,7 @@ fun LoginScreen(navController: NavController) {
 
                     // Botón de Google Estilizado
                     FuturisticButton(
-                        text = "CONTINUAR CON GOOGLE",
+                        text = "CONTINUA CON GOOGLE",
                         onClick = {
                             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                                 .requestIdToken(context.getString(R.string.default_web_client_id))

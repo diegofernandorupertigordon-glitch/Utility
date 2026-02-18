@@ -28,4 +28,5 @@ sealed class Routes(val route: String) {
     object AdminProducts : Routes("admin_products") // Panel Central
     object AdminInventory : Routes("admin_inventory") // Inventario + Registro
     object SalesHistory : Routes("sales_history") // Historial
+    object Manual : Routes("manual") // Manual usuario
 }

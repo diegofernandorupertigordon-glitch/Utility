@@ -271,12 +271,16 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel) {
                         Spacer(modifier = Modifier.height(24.dp))
 
                         FuturisticButton(
-                            text = "CONFIRMAR PEDIDO",
+                            text = "FINALIZAR Y ENVIAR TICKET", // Texto más claro para el flujo
                             modifier = Modifier.fillMaxWidth(),
                             onClick = {
                                 viewModel.checkout(
+                                    context = context,
                                     onSuccess = {
-                                        Toast.makeText(context, "✅ ¡Pedido recibido!", Toast.LENGTH_SHORT).show()
+                                        // Quitamos el Toast pequeño y ponemos uno más descriptivo
+                                        Toast.makeText(context, "Generando ticket profesional...", Toast.LENGTH_LONG).show()
+
+                                        // Navegación de retorno
                                         navController.navigate(Routes.TiendaHome.route) {
                                             popUpTo(Routes.TiendaHome.route) { inclusive = true }
                                         }

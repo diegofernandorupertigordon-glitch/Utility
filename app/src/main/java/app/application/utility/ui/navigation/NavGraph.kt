@@ -17,6 +17,7 @@ import app.application.utility.ui.screens.primo.PrimoScreen
 import app.application.utility.ui.screens.saludo.SaludoScreen
 import app.application.utility.ui.screens.selector.SelectorScreen
 import app.application.utility.ui.screens.splash.SplashScreen
+import app.application.utility.ui.screens.tienda.ManualScreen
 import app.application.utility.ui.screens.tienda.admin.AdminMenuScreen
 import app.application.utility.ui.screens.tienda.admin.AdminProductScreen
 import app.application.utility.ui.screens.tienda.admin.SalesHistoryScreen
@@ -52,6 +53,15 @@ fun NavGraph(navController: NavHostController) {
         // --- TIENDA ---
         composable(Routes.TiendaHome.route) { TiendaHomeScreen(navController) }
         composable(Routes.Cart.route) { CartScreen(navController, cartViewModel) }
+
+        // --- RUTA: MANUAL DE USUARIO ---
+        composable(
+            route = "${Routes.Manual.route}?seccion={seccion}",
+            arguments = listOf(navArgument("seccion") { defaultValue = "MANUAL" })
+        ) { backStackEntry ->
+            val seccion = backStackEntry.arguments?.getString("seccion") ?: "MANUAL"
+            ManualScreen(navController, seccion)
+        }
 
         // --- SECCIÓN ADMIN ---
         // 1. Panel Central
